@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Finanças 2026 — Painel de Metas</title>
+    <title>Finanças 2026 — Custos Variáveis</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
         <aside class="sidebar" id="app-sidebar"></aside>
         <div class="content">
             <header class="page-header">
-                <h1>Painel de Metas Fixas</h1>
-                <p>Receitas, reserva e despesas com meta mensal — Fluxo + Crédito somados por categoria.</p>
+                <h1>Custos Variáveis</h1>
+                <p>Categorias com teto anual ou meta delimitada no tempo — mês em foco independente do Painel de Metas.</p>
             </header>
 
             <main>
@@ -31,24 +31,20 @@
                 </div>
 
                 <div class="card">
-                    <h2>Resumo do mês</h2>
-                    <div class="summary-grid" id="summary"></div>
-                </div>
-
-                <div class="card">
-                    <h2>Detalhe por categoria</h2>
+                    <h2>Categorias</h2>
                     <div class="table-scroll">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Código</th>
                                     <th>Categoria</th>
-                                    <th>Caráter</th>
-                                    <th class="num">Meta</th>
+                                    <th>Tipo</th>
+                                    <th class="num">Teto</th>
                                     <th class="num">Realizado</th>
-                                    <th class="num">Diferença</th>
+                                    <th class="num">Saldo</th>
+                                    <th class="num">% usado</th>
+                                    <th>Referência</th>
                                     <th>Status</th>
-                                    <th>Fonte</th>
                                 </tr>
                             </thead>
                             <tbody id="rows"></tbody>
@@ -62,6 +58,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="js/supabaseClient.js"></script>
     <script src="js/common.js"></script>
-    <script src="js/painel.js"></script>
+    <script src="js/custos.js"></script>
 </body>
 </html>

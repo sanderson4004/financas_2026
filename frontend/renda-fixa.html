@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Renda Fixa</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Renda Fixa</h1>
+                <p>CDB, Tesouro Direto, LCI, LCA e afins. IR estimado pela tabela regressiva.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Nova aplicação</h2>
+                    <form id="rf-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="instituicao">Instituição</label>
+                                <input type="text" id="instituicao" required>
+                            </div>
+                            <div>
+                                <label for="tipo_ativo">Tipo de ativo</label>
+                                <input type="text" id="tipo_ativo" required placeholder="ex: CDB, LCI, Tesouro">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="indexador">Indexador / rentabilidade</label>
+                                <input type="text" id="indexador" placeholder="ex: 108% do CDI">
+                            </div>
+                            <div>
+                                <label for="isento_ir">Isento de IR?</label>
+                                <select id="isento_ir">
+                                    <option value="false">Não</option>
+                                    <option value="true">Sim</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="data_aplicacao">Data da aplicação</label>
+                                <input type="date" id="data_aplicacao" required>
+                            </div>
+                            <div>
+                                <label for="data_vencimento">Data de vencimento</label>
+                                <input type="date" id="data_vencimento" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="valor_aplicado">Valor aplicado (R$)</label>
+                                <input type="number" id="valor_aplicado" step="0.01" required>
+                            </div>
+                            <div>
+                                <label for="valor_bruto_atual">Valor bruto atual (R$)</label>
+                                <input type="number" id="valor_bruto_atual" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit">Salvar</button>
+                        <div id="msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Carteira de Renda Fixa</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Instituição</th>
+                                    <th>Tipo</th>
+                                    <th class="num">Aplicado</th>
+                                    <th class="num">Bruto atual</th>
+                                    <th class="num">Valorização</th>
+                                    <th class="num">Dias venc.</th>
+                                    <th class="num">IR estim.</th>
+                                    <th class="num">Líquido estim.</th>
+                                    <th class="num">% carteira</th>
+                                    <th>Atualizar valor bruto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/rendaFixa.js"></script>
+</body>
+</html>

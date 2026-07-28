@@ -1,24 +1,17 @@
-function primeiroDiaDoMes(valorInputMonth) {
-    // valorInputMonth vem como "2026-08" do <input type="month">
-    return `${valorInputMonth}-01`;
-}
-
-function mesAtualComoInput() {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-    return `${ano}-${mes}`;
-}
-
-async function carregarPainel(mesInput) {
+async function carregarPainel(mesFoco) {
     const tbody = document.getElementById('rows');
     tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
 
-    const mesFoco = primeiroDiaDoMes(mesInput);
-    const { data, error } = await supabase.rpc('painel_metas_fixas', { mes_foco: mesFoco });
+    const { data, error } = await sb.rpc('painel_metas_fixas', { mes_foco: mesFoco });
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
+        document.getElementById('summary').innerHTML = '';
+        return;
+    }
+
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Nenhuma meta mensal vigente neste mês.</div></td></tr>';
         document.getElementById('summary').innerHTML = '';
         return;
     }
@@ -41,7 +34,7 @@ async function carregarPainel(mesInput) {
             <td class="num">${formatMoney(r.meta)}</td>
             <td class="num">${formatMoney(r.realizado)}</td>
             <td class="num">${r.diferenca === null ? '—' : formatMoney(r.diferenca)}</td>
-            <td class="${statusClass(r.status)}">${r.status}</td>
+            <td>${statusPill(r.status)}</td>
             <td>${r.fonte || ''}</td>
         `;
         tbody.appendChild(tr);
@@ -61,9 +54,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const session = await requireAuth();
     if (!session) return;
 
-    const mesInput = document.getElementById('mes');
-    mesInput.value = mesAtualComoInput();
-    mesInput.addEventListener('change', () => carregarPainel(mesInput.value));
+    const hoje = new Date();
+    popularSeletorMesAno('mes-sel', 'ano-sel', hoje.getFullYear() - 2, hoje.getFullYear() + 2);
+    definirSeletorMesAno('mes-sel', 'ano-sel', hoje.getMonth() + 1, hoje.getFullYear());
 
-    carregarPainel(mesInput.value);
+    const recarregar = () => carregarPainel(lerSeletorMesAnoComoData('mes-sel', 'ano-sel'));
+    document.getElementById('mes-sel').addEventListener('change', recarregar);
+    document.getElementById('ano-sel').addEventListener('change', recarregar);
+
+    recarregar();
 });

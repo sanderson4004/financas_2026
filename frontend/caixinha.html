@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Caixinha Turbo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Caixinha Turbo</h1>
+                <p>Extrato do RDB — saldo acumulado calculado automaticamente a cada movimentação.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Resumo</h2>
+                    <div class="summary-grid" id="resumo"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Configuração (ajuste manual)</h2>
+                    <form id="config-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="saldo_inicial">Saldo inicial</label>
+                                <input type="number" id="saldo_inicial" step="0.01" required>
+                            </div>
+                            <div>
+                                <label for="total_liquido_app">Total líquido (informado pelo app)</label>
+                                <input type="number" id="total_liquido_app" step="0.01">
+                            </div>
+                        </div>
+                        <button type="submit">Salvar configuração</button>
+                        <div id="config-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Nova movimentação</h2>
+                    <form id="mov-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="tipo_movimento">Tipo</label>
+                                <select id="tipo_movimento" required>
+                                    <option value="Aplicação">Aplicação</option>
+                                    <option value="Resgate">Resgate</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="valor">Valor (R$)</label>
+                                <input type="number" id="valor" step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="data">Data</label>
+                                <input type="date" id="data" required>
+                            </div>
+                            <div>
+                                <label for="origem_motivo">Origem / motivo</label>
+                                <input type="text" id="origem_motivo" required placeholder="ex: Aporte Meu, Resgate p/ Fluxo">
+                            </div>
+                        </div>
+                        <button type="submit">Lançar</button>
+                        <div id="mov-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Extrato (mais recentes)</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Origem/Motivo</th>
+                                    <th class="num">Valor</th>
+                                    <th class="num">Saldo acumulado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/caixinha.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Planejamento Futuro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Planejamento Futuro</h1>
+                <p>Cenários e simulações hipotéticas — não conecta com Fluxo/Crédito.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Novo item de simulação</h2>
+                    <p class="msg hint">O resultado é calculado aqui na hora, no navegador — nada é gravado como fórmula.</p>
+                    <form id="pf-form" class="stack">
+                        <div>
+                            <label for="cenario">Cenário / grupo</label>
+                            <input type="text" id="cenario" required list="cenarios-existentes" placeholder="ex: CENÁRIO C — ...">
+                            <datalist id="cenarios-existentes"></datalist>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="carater">Caráter</label>
+                                <select id="carater" required>
+                                    <option value="RECEITA">Receita</option>
+                                    <option value="DESPESA" selected>Despesa</option>
+                                    <option value="RESERVA">Reserva</option>
+                                    <option value="TOTAL">Total</option>
+                                    <option value="SALDO">Saldo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="item">Item</label>
+                                <input type="text" id="item" required placeholder="ex: Dízimo, Reserva de emergência">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="valor">Valor (R$)</label>
+                                <input type="number" id="valor" step="0.01" required>
+                            </div>
+                            <div>
+                                <label for="meses">Meses (só p/ simulação de rendimento)</label>
+                                <input type="number" id="meses" min="1">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="rendimento_anual">Rendimento a.a. (ex: 1,09 = 9%)</label>
+                                <input type="number" id="rendimento_anual" step="0.0001">
+                            </div>
+                            <div>
+                                <label for="tipo_calculo">Tipo de cálculo</label>
+                                <select id="tipo_calculo">
+                                    <option value="">— sem simulação —</option>
+                                    <option value="Aporte Mensal Recorrente">Aporte Mensal Recorrente</option>
+                                    <option value="Valor Único">Valor Único</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="descricao">Observação</label>
+                            <input type="text" id="descricao">
+                        </div>
+                        <div class="stat" style="max-width:280px">
+                            <div class="label">Resultado calculado (prévia)</div>
+                            <div class="value" id="resultado-preview">—</div>
+                        </div>
+                        <button type="submit">Salvar</button>
+                        <div id="msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Itens já cadastrados</h2>
+                    <div id="grupos"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/planejamento.js"></script>
+</body>
+</html>

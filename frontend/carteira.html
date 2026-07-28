@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Carteira Consolidada</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Carteira Consolidada</h1>
+                <p>Soma automática de Renda Fixa + Bolsa + Caixinha Turbo.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Patrimônio total</h2>
+                    <div class="summary-grid" id="resumo"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Distribuição</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fonte</th>
+                                    <th class="num">Valor</th>
+                                    <th class="num">% da carteira</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/carteira.js"></script>
+</body>
+</html>

@@ -7,76 +7,84 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="topbar">
-        <h1>Finanças 2026</h1>
-        <nav class="tabs">
-            <a href="painel.html">Painel de Metas</a>
-            <a href="fluxo.html">Fluxo</a>
-            <a href="credito.html" class="active">Crédito</a>
-        </nav>
-        <button id="logout-btn" class="secondary">Sair</button>
-    </header>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Crédito</h1>
+                <p>Controle de parcelas no cartão. Uma compra vira uma linha aqui + N parcelas geradas automaticamente.</p>
+            </header>
 
-    <main>
-        <div class="card">
-            <h2>Nova compra no cartão</h2>
-            <form id="credito-form" class="stack">
-                <div>
-                    <label for="descricao">Descrição</label>
-                    <input type="text" id="descricao" required>
+            <main>
+                <div class="card">
+                    <h2>Nova compra no cartão</h2>
+                    <form id="credito-form" class="stack">
+                        <div>
+                            <label for="descricao">Descrição</label>
+                            <input type="text" id="descricao" required>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="cartao">Cartão</label>
+                                <select id="cartao" required>
+                                    <option value="CC – Nubank">CC – Nubank</option>
+                                    <option value="CC - Itaú">CC - Itaú</option>
+                                    <option value="CC - VISA MP">CC - VISA MP</option>
+                                    <option value="Linha de Crédito - MP Empréstimo">Linha de Crédito - MP Empréstimo</option>
+                                    <option value="Pix">Pix</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="categoria">Categoria</label>
+                                <select id="categoria" required></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="data_compra">Data da compra</label>
+                                <input type="date" id="data_compra" required>
+                            </div>
+                            <div>
+                                <label for="data_primeiro_vencimento">Vencimento da 1ª parcela</label>
+                                <input type="date" id="data_primeiro_vencimento" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="total_parcelas">Quantidade de parcelas</label>
+                                <input type="number" id="total_parcelas" min="1" value="1" required>
+                            </div>
+                            <div>
+                                <label for="valor_parcela">Valor de cada parcela (R$)</label>
+                                <input type="number" id="valor_parcela" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit">Lançar compra</button>
+                        <div id="msg" class="msg"></div>
+                    </form>
                 </div>
-                <div class="row">
-                    <div>
-                        <label for="cartao">Cartão</label>
-                        <input type="text" id="cartao" required placeholder="ex: CC – Nubank">
-                    </div>
-                    <div>
-                        <label for="categoria">Categoria</label>
-                        <select id="categoria" required></select>
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        <label for="data_compra">Data da compra</label>
-                        <input type="date" id="data_compra" required>
-                    </div>
-                    <div>
-                        <label for="data_primeiro_vencimento">Vencimento da 1ª parcela</label>
-                        <input type="date" id="data_primeiro_vencimento" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        <label for="total_parcelas">Quantidade de parcelas</label>
-                        <input type="number" id="total_parcelas" min="1" value="1" required>
-                    </div>
-                    <div>
-                        <label for="valor_parcela">Valor de cada parcela (R$)</label>
-                        <input type="number" id="valor_parcela" step="0.01" required>
-                    </div>
-                </div>
-                <button type="submit">Lançar compra</button>
-                <div id="msg" class="msg"></div>
-            </form>
-        </div>
 
-        <div class="card">
-            <h2>Compras recentes</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Cartão</th>
-                        <th>Categoria</th>
-                        <th class="num">Parcela</th>
-                        <th class="num">Valor total</th>
-                        <th class="num">Pagas</th>
-                    </tr>
-                </thead>
-                <tbody id="rows"></tbody>
-            </table>
+                <div class="card">
+                    <h2>Compras recentes</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Cartão</th>
+                                    <th>Categoria</th>
+                                    <th class="num">Parcela</th>
+                                    <th class="num">Valor total</th>
+                                    <th class="num">Pagas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
-    </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="js/supabaseClient.js"></script>

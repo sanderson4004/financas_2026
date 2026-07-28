@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Bolsa de Valores</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Bolsa de Valores</h1>
+                <p>Ações, FIIs, ETFs e BDRs.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Novo ativo</h2>
+                    <p class="msg hint">Se o ticker já existir na carteira, não cadastre de novo — some a quantidade e recalcule o preço médio ponderado antes de atualizar a linha existente.</p>
+                    <form id="bolsa-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="ticker">Ticker</label>
+                                <input type="text" id="ticker" required placeholder="ex: GARE11">
+                            </div>
+                            <div>
+                                <label for="nome_ativo">Nome do ativo</label>
+                                <input type="text" id="nome_ativo" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="tipo">Tipo</label>
+                                <input type="text" id="tipo" required placeholder="ex: FII, Ação, ETF, BDR">
+                            </div>
+                            <div>
+                                <label for="quantidade">Quantidade total</label>
+                                <input type="number" id="quantidade" step="0.000001" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="preco_medio">Preço médio (R$)</label>
+                                <input type="number" id="preco_medio" step="0.0001" required>
+                            </div>
+                            <div>
+                                <label for="cotacao_atual">Cotação atual (R$)</label>
+                                <input type="number" id="cotacao_atual" step="0.0001" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="proventos_recebidos">Proventos recebidos (R$, acumulado)</label>
+                            <input type="number" id="proventos_recebidos" step="0.01" value="0">
+                        </div>
+                        <button type="submit">Salvar</button>
+                        <div id="msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Carteira de Bolsa</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th class="num">Qtd.</th>
+                                    <th class="num">Valor mercado</th>
+                                    <th class="num">Valoriz. %</th>
+                                    <th class="num">Rentab. total %</th>
+                                    <th class="num">% carteira</th>
+                                    <th>Atualizar cotação / proventos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/bolsa.js"></script>
+</body>
+</html>

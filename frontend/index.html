@@ -9,7 +9,8 @@
 <body>
     <div class="login-wrap">
         <div class="card login-box">
-            <h2>Finanças 2026</h2>
+            <div class="brand-title"><span class="dot"></span> Finanças 2026</div>
+            <p class="subtitle">Acesso restrito. Entre com seu e-mail e senha.</p>
             <form id="login-form" class="stack">
                 <div>
                     <label for="email">E-mail</label>
@@ -29,7 +30,7 @@
     <script src="js/supabaseClient.js"></script>
     <script>
         (async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await sb.auth.getSession();
             if (session) window.location.href = 'painel.html';
         })();
 
@@ -41,7 +42,7 @@
             msg.textContent = 'Entrando...';
             msg.className = 'msg';
 
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await sb.auth.signInWithPassword({ email, password });
             if (error) {
                 msg.textContent = 'E-mail ou senha incorretos.';
                 msg.className = 'msg error';
