@@ -1,5 +1,5 @@
 async function requireAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sb.auth.getSession();
     if (!session) {
         window.location.href = 'index.html';
         return null;
@@ -8,7 +8,7 @@ async function requireAuth() {
 }
 
 async function logout() {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     window.location.href = 'index.html';
 }
 

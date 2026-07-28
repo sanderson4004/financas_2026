@@ -1,6 +1,6 @@
 async function carregarCategorias() {
     const sel = document.getElementById('categoria');
-    const { data, error } = await supabase
+    const { data, error } = await sb
         .from('categorias')
         .select('codigo, nome')
         .eq('status', 'ATIVA')
@@ -18,7 +18,7 @@ async function carregarLancamentos() {
     const tbody = document.getElementById('rows');
     tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
 
-    const { data, error } = await supabase
+    const { data, error } = await sb
         .from('lancamentos_fluxo')
         .select('*, categorias(nome)')
         .order('id', { ascending: false })
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             descricao: document.getElementById('descricao').value || null,
         };
 
-        const { error } = await supabase.from('lancamentos_fluxo').insert(payload);
+        const { error } = await sb.from('lancamentos_fluxo').insert(payload);
 
         if (error) {
             msg.textContent = `Erro: ${error.message}`;

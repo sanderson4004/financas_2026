@@ -4,4 +4,6 @@
 const SUPABASE_URL = 'https://aowwrfunohwthxjgbycg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_qzXZ_6zWFkLqUaG-_nZyHQ_2QLSYZ-j';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Nome "sb", não "supabase" — a própria biblioteca já usa window.supabase
+// como namespace global; declarar "const supabase" de novo colide com isso.
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);

@@ -1,6 +1,6 @@
 async function carregarCategorias() {
     const sel = document.getElementById('categoria');
-    const { data, error } = await supabase
+    const { data, error } = await sb
         .from('categorias')
         .select('codigo, nome')
         .eq('status', 'ATIVA')
@@ -24,7 +24,7 @@ async function carregarCompras() {
     const tbody = document.getElementById('rows');
     tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
 
-    const { data: compras, error } = await supabase
+    const { data: compras, error } = await sb
         .from('compras_credito')
         .select('*, categorias(nome)')
         .order('id', { ascending: false })
@@ -41,7 +41,7 @@ async function carregarCompras() {
     }
 
     const ids = compras.map(c => c.id);
-    const { data: parcelas } = await supabase
+    const { data: parcelas } = await sb
         .from('parcelas_credito')
         .select('compra_id, pago')
         .in('compra_id', ids);
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             valor_parcela: valorParcela,
         };
 
-        const { data: compra, error: errCompra } = await supabase
+        const { data: compra, error: errCompra } = await sb
             .from('compras_credito')
             .insert(compraPayload)
             .select()
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        const { error: errParcelas } = await supabase.from('parcelas_credito').insert(parcelas);
+        const { error: errParcelas } = await sb.from('parcelas_credito').insert(parcelas);
 
         if (errParcelas) {
             msg.textContent = `Compra salva, mas houve erro ao gerar as parcelas: ${errParcelas.message}`;
