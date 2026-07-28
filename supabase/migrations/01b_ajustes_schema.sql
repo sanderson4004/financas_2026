@@ -14,6 +14,31 @@ alter table metas alter column tipo_teto drop not null;
 alter table metas alter column tipo_teto drop default;
 
 -- -------------------------------------------------------------------------
+-- lancamentos_fluxo: existe 1 lançamento histórico real ("Abatimento
+-- fatura") em que DATA MOVIMENTO nunca foi preenchida (só tem "N/A" na
+-- planilha) e só a DATA PGTO existe. Isso é coerente com a própria regra de
+-- mês de referência (que já prioriza data_pagamento) — então data_movimento
+-- precisa poder ser nula nesse caso raro, em vez de eu inventar uma data.
+-- -------------------------------------------------------------------------
+alter table lancamentos_fluxo alter column data_movimento drop not null;
+alter table lancamentos_fluxo add constraint chk_fluxo_tem_alguma_data
+    check (data_movimento is not null or data_pagamento is not null);
+
+-- -------------------------------------------------------------------------
+-- compras_credito / parcelas_credito: a categoria pode mudar PARCELA A
+-- PARCELA dentro da mesma compra (ex: você recategoriza as parcelas futuras
+-- de uma compra sem mexer nas que já foram pagas com a categoria antiga —
+-- caso real encontrado nos dados: "Presente Livro Maxton Hall..." tem as
+-- parcelas 1-2 em "Relacionamento" e as parcelas 3-5 em "Cosméticos e
+-- Farmácia"). Categoria não pode viver na compra, tem que viver na parcela.
+-- -------------------------------------------------------------------------
+alter table parcelas_credito add column categoria_codigo text not null references categorias(codigo);
+create index idx_parcelas_categoria on parcelas_credito (categoria_codigo);
+
+alter table compras_credito alter column categoria_codigo drop not null;
+comment on column compras_credito.categoria_codigo is 'Categoria da compra no momento em que foi criada — só informativa/histórica. A categoria que REALMENTE conta pro painel de metas é a de cada parcela (parcelas_credito.categoria_codigo), que pode divergir se você recategorizar parcelas futuras.';
+
+-- -------------------------------------------------------------------------
 -- planejamento_futuro: a aba real tem 5 blocos de simulação (Cenário A,
 -- Cenário B, Participação em Imóvel, Uso do Saldo Acumulado, Distribuição
 -- da Rotina Mensal), cada um uma lista de itens com caráter (RECEITA/
