@@ -29,7 +29,7 @@
     <script src="js/supabaseClient.js"></script>
     <script>
         (async () => {
-            const { data: { session } } = await sb.auth.getSession();
+            const { data: { session } } = await supabase.auth.getSession();
             if (session) window.location.href = 'painel.html';
         })();
 
@@ -41,7 +41,7 @@
             msg.textContent = 'Entrando...';
             msg.className = 'msg';
 
-            const { error } = await sb.auth.signInWithPassword({ email, password });
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
                 msg.textContent = 'E-mail ou senha incorretos.';
                 msg.className = 'msg error';

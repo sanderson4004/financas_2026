@@ -15,7 +15,7 @@ async function carregarPainel(mesInput) {
     tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
 
     const mesFoco = primeiroDiaDoMes(mesInput);
-    const { data, error } = await sb.rpc('painel_metas_fixas', { mes_foco: mesFoco });
+    const { data, error } = await supabase.rpc('painel_metas_fixas', { mes_foco: mesFoco });
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
