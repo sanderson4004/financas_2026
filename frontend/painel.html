@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Painel de Metas</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Finanças 2026</h1>
+        <nav class="tabs">
+            <a href="painel.html" class="active">Painel de Metas</a>
+            <a href="fluxo.html">Fluxo</a>
+            <a href="credito.html">Crédito</a>
+        </nav>
+        <button id="logout-btn" class="secondary">Sair</button>
+    </header>
+
+    <main>
+        <div class="card">
+            <label for="mes">Mês em foco</label>
+            <input type="month" id="mes">
+        </div>
+
+        <div class="card">
+            <div class="summary-grid" id="summary"></div>
+        </div>
+
+        <div class="card">
+            <h2>Detalhe por categoria</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Categoria</th>
+                        <th>Caráter</th>
+                        <th class="num">Meta</th>
+                        <th class="num">Realizado</th>
+                        <th class="num">Diferença</th>
+                        <th>Status</th>
+                        <th>Fonte</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/painel.js"></script>
+</body>
+</html>

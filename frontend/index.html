@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Entrar</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="card login-box">
+            <h2>Finanças 2026</h2>
+            <form id="login-form" class="stack">
+                <div>
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required autocomplete="username">
+                </div>
+                <div>
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit">Entrar</button>
+                <div id="msg" class="msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script>
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) window.location.href = 'painel.html';
+        })();
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
+            msg.textContent = 'Entrando...';
+            msg.className = 'msg';
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                msg.textContent = 'E-mail ou senha incorretos.';
+                msg.className = 'msg error';
+                return;
+            }
+            window.location.href = 'painel.html';
+        });
+    </script>
+</body>
+</html>

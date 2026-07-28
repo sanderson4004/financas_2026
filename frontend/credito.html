@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Crédito</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Finanças 2026</h1>
+        <nav class="tabs">
+            <a href="painel.html">Painel de Metas</a>
+            <a href="fluxo.html">Fluxo</a>
+            <a href="credito.html" class="active">Crédito</a>
+        </nav>
+        <button id="logout-btn" class="secondary">Sair</button>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2>Nova compra no cartão</h2>
+            <form id="credito-form" class="stack">
+                <div>
+                    <label for="descricao">Descrição</label>
+                    <input type="text" id="descricao" required>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="cartao">Cartão</label>
+                        <input type="text" id="cartao" required placeholder="ex: CC – Nubank">
+                    </div>
+                    <div>
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" required></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="data_compra">Data da compra</label>
+                        <input type="date" id="data_compra" required>
+                    </div>
+                    <div>
+                        <label for="data_primeiro_vencimento">Vencimento da 1ª parcela</label>
+                        <input type="date" id="data_primeiro_vencimento" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="total_parcelas">Quantidade de parcelas</label>
+                        <input type="number" id="total_parcelas" min="1" value="1" required>
+                    </div>
+                    <div>
+                        <label for="valor_parcela">Valor de cada parcela (R$)</label>
+                        <input type="number" id="valor_parcela" step="0.01" required>
+                    </div>
+                </div>
+                <button type="submit">Lançar compra</button>
+                <div id="msg" class="msg"></div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Compras recentes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Cartão</th>
+                        <th>Categoria</th>
+                        <th class="num">Parcela</th>
+                        <th class="num">Valor total</th>
+                        <th class="num">Pagas</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/credito.js"></script>
+</body>
+</html>

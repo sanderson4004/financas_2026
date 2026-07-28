@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Fluxo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Finanças 2026</h1>
+        <nav class="tabs">
+            <a href="painel.html">Painel de Metas</a>
+            <a href="fluxo.html" class="active">Fluxo</a>
+            <a href="credito.html">Crédito</a>
+        </nav>
+        <button id="logout-btn" class="secondary">Sair</button>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2>Novo lançamento (Pix, dinheiro, débito, transferência)</h2>
+            <form id="fluxo-form" class="stack">
+                <div class="row">
+                    <div>
+                        <label for="carater">Caráter</label>
+                        <select id="carater" required>
+                            <option value="RECEITA">Receita</option>
+                            <option value="DESPESA" selected>Despesa</option>
+                            <option value="TRANSFERÊNCIA">Transferência</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="valor">Valor (R$)</label>
+                        <input type="number" id="valor" step="0.01" required placeholder="ex: 150.00 ou -150.00">
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="data_movimento">Data do movimento</label>
+                        <input type="date" id="data_movimento" required>
+                    </div>
+                    <div>
+                        <label for="data_pagamento">Data de pagamento (se diferente)</label>
+                        <input type="date" id="data_pagamento">
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="metodo">Método</label>
+                        <input type="text" id="metodo" required placeholder="ex: Pix, Débito, Dinheiro">
+                    </div>
+                    <div>
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" required></select>
+                    </div>
+                </div>
+                <div>
+                    <label for="descricao">Descrição</label>
+                    <input type="text" id="descricao">
+                </div>
+                <button type="submit">Lançar</button>
+                <div id="msg" class="msg"></div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Últimos lançamentos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Caráter</th>
+                        <th>Categoria</th>
+                        <th>Método</th>
+                        <th>Descrição</th>
+                        <th class="num">Valor</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/fluxo.js"></script>
+</body>
+</html>
