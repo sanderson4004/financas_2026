@@ -72,7 +72,7 @@ async function carregarVigencias() {
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Nenhuma vigência cadastrada ainda.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8">${estadoVazioHTML('Nenhuma vigência cadastrada ainda.', '🎯')}</td></tr>`;
         return;
     }
 
@@ -146,8 +146,8 @@ function atualizarCamposVigencia() {
     const tipo = document.getElementById('vig-tipo').value;
     const periodicidade = document.getElementById('vig-periodicidade').value;
 
-    document.getElementById('vig-periodicidade-wrap').style.display = tipo === 'VARIAVEL' ? 'flex' : 'none';
-    document.getElementById('vig-janela-wrap').style.display = (tipo === 'VARIAVEL' && periodicidade === 'OUTRO_DELIMITADO') ? 'block' : 'none';
+    document.getElementById('vig-periodicidade-wrap').classList.toggle('oculto', tipo !== 'VARIAVEL');
+    document.getElementById('vig-janela-wrap').classList.toggle('oculto', !(tipo === 'VARIAVEL' && periodicidade === 'OUTRO_DELIMITADO'));
 }
 
 async function carregarListaCadastro(table, tbodyId, temCor) {
@@ -163,7 +163,7 @@ async function carregarListaCadastro(table, tbodyId, temCor) {
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${colspan}"><div class="empty-state">Nada cadastrado ainda.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colspan}">${estadoVazioHTML('Nada cadastrado ainda.', '🗂️')}</td></tr>`;
         return;
     }
 
@@ -242,6 +242,7 @@ function wireCadastroSimples(formId, table, inputId, msgId, tbodyId, corInputId)
             msg.className = 'msg success';
             document.getElementById(formId).reset();
             await carregarListaCadastro(table, tbodyId, !!corInputId);
+            toast(`"${nome}" cadastrado.`);
         });
     });
 }
@@ -255,6 +256,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarVigencias();
     await carregarListaCadastro('metodos_pagamento', 'met-rows', true);
     await carregarListaCadastro('cartoes', 'cart-rows', false);
+
+    vigiarContrasteCor('cat-cor', 'cat-cor-aviso');
+    vigiarContrasteCor('met-cor', 'met-cor-aviso');
 
     makeSortable('cat-rows');
     makeSortable('vig-rows');
@@ -301,6 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('vigencia-form').reset();
             atualizarCamposVigencia();
             await carregarVigencias();
+            toast('Vigência cadastrada.');
         });
     });
 
@@ -332,6 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('categoria-form').reset();
             await carregarCategoriasCadastro();
             await carregarCategoriaSelectVigencia();
+            toast('Categoria cadastrada.');
         });
     });
 

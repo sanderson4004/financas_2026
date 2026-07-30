@@ -13,11 +13,11 @@ async function carregarBolsa() {
         <tr>
             <td>${r.ticker}</td>
             <td>${r.nome_ativo}</td>
-            <td>${r.tipo}</td>
+            <td class="secundaria">${r.tipo}</td>
             <td class="num">${r.quantidade}</td>
             <td class="num">${formatMoney(r.valor_mercado_atual)}</td>
-            <td class="num">${(r.valorizacao_percentual * 100).toFixed(2)}%</td>
-            <td class="num">${(r.rentabilidade_total_percentual * 100).toFixed(2)}%</td>
+            <td class="num secundaria">${(r.valorizacao_percentual * 100).toFixed(2)}%</td>
+            <td class="num secundaria">${(r.rentabilidade_total_percentual * 100).toFixed(2)}%</td>
             <td class="num">${(r.percentual_carteira * 100).toFixed(1)}%</td>
             <td>
                 <div class="inline-update">
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             msg.className = 'msg success';
             document.getElementById('bolsa-form').reset();
             await carregarBolsa();
+            toast('Ativo salvo.');
         });
     });
 });

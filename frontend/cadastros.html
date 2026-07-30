@@ -41,10 +41,11 @@
                             <div>
                                 <label for="cat-cor">Cor</label>
                                 <input type="color" id="cat-cor" value="#4f8ff7">
+                                <div class="msg" id="cat-cor-aviso" aria-live="polite" style="margin-top:6px"></div>
                             </div>
                         </div>
                         <button type="submit">Cadastrar categoria</button>
-                        <div id="categoria-msg" class="msg"></div>
+                        <div id="categoria-msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 
@@ -88,7 +89,7 @@
                                 <input type="number" id="vig-valor" step="0.01" placeholder="deixe em branco só p/ categoria Reserva">
                             </div>
                         </div>
-                        <div class="row" id="vig-periodicidade-wrap" style="display:none">
+                        <div class="row campo-condicional oculto" id="vig-periodicidade-wrap">
                             <div>
                                 <label for="vig-periodicidade">Periodicidade</label>
                                 <select id="vig-periodicidade">
@@ -96,7 +97,7 @@
                                     <option value="OUTRO_DELIMITADO">Prazo delimitado — até uma data</option>
                                 </select>
                             </div>
-                            <div id="vig-janela-wrap" style="display:none">
+                            <div class="campo-condicional oculto" id="vig-janela-wrap">
                                 <label for="vig-janela">Como acumula</label>
                                 <select id="vig-janela">
                                     <option value="MES_FOCO">Teto de gasto no mês em foco</option>
@@ -119,7 +120,7 @@
                             <input type="text" id="vig-observacao">
                         </div>
                         <button type="submit">Cadastrar vigência</button>
-                        <div id="vigencia-msg" class="msg"></div>
+                        <div id="vigencia-msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 
@@ -147,7 +148,7 @@
                 <div class="card" id="metodos">
                     <h2>Novo método de pagamento</h2>
                     <p class="msg hint">Usado no <em>Método</em> da aba Fluxo (Pix, Dinheiro, cartão de débito etc.).</p>
-                    <form id="metodo-form" class="stack" style="max-width:360px">
+                    <form id="metodo-form" class="stack">
                         <div>
                             <label for="met-nome">Nome</label>
                             <input type="text" id="met-nome" required placeholder="ex: CC - Bradesco">
@@ -155,9 +156,10 @@
                         <div>
                             <label for="met-cor">Cor</label>
                             <input type="color" id="met-cor" value="#22c55e">
+                            <div class="msg" id="met-cor-aviso" aria-live="polite" style="margin-top:6px"></div>
                         </div>
                         <button type="submit">Cadastrar método</button>
-                        <div id="met-msg" class="msg"></div>
+                        <div id="met-msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 
@@ -181,13 +183,13 @@
                 <div class="card" id="cartoes">
                     <h2>Novo cartão</h2>
                     <p class="msg hint">Usado no <em>Cartão</em> da aba Crédito.</p>
-                    <form id="cartao-form" class="stack" style="max-width:360px">
+                    <form id="cartao-form" class="stack">
                         <div>
                             <label for="cart-nome">Nome</label>
                             <input type="text" id="cart-nome" required placeholder="ex: CC - Bradesco">
                         </div>
                         <button type="submit">Cadastrar cartão</button>
-                        <div id="cart-msg" class="msg"></div>
+                        <div id="cart-msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 

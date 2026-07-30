@@ -144,6 +144,68 @@ async function comBotaoOcupado(botao, acao) {
     }
 }
 
+// Toast flutuante pra ações importantes (lançar, salvar, excluir) — fica
+// visível por alguns segundos mesmo se o usuário já rolou a página.
+function toast(mensagem, tipo) {
+    let stack = document.getElementById('toast-stack');
+    if (!stack) {
+        stack = document.createElement('div');
+        stack.id = 'toast-stack';
+        stack.setAttribute('role', 'status');
+        stack.setAttribute('aria-live', 'polite');
+        document.body.appendChild(stack);
+    }
+
+    const el = document.createElement('div');
+    el.className = `toast ${tipo === 'erro' ? 'erro' : ''}`;
+    el.innerHTML = `<span class="icone">${tipo === 'erro' ? '⚠️' : '✅'}</span><span>${mensagem}</span>`;
+    stack.appendChild(el);
+
+    setTimeout(() => {
+        el.classList.add('saindo');
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+    }, 3200);
+}
+
+// Estado vazio com ícone — mais fácil de "escanear" que um texto cinza
+// solto, e a mensagem pode sugerir a próxima ação (ex: "lance seu primeiro
+// movimento acima").
+function estadoVazioHTML(mensagem, icone) {
+    return `<div class="empty-state"><div class="empty-icon">${icone || '🗂️'}</div><p>${mensagem}</p></div>`;
+}
+
+// -----------------------------------------------------------------------
+// Aviso de contraste: cor escolhida pra categoria/método fica pouco visível
+// se for muito escura, quase se confundindo com o fundo do sistema (que já
+// é escuro por padrão). Não bloqueia o cadastro, só avisa.
+// -----------------------------------------------------------------------
+function luminanciaRelativa(hex) {
+    const h = (hex || '').replace('#', '');
+    if (h.length !== 6) return 1;
+    const [r, g, b] = [0, 2, 4].map(i => {
+        let c = parseInt(h.substr(i, 2), 16) / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function vigiarContrasteCor(inputId, avisoId) {
+    const input = document.getElementById(inputId);
+    const aviso = document.getElementById(avisoId);
+    if (!input || !aviso) return;
+
+    const checar = () => {
+        const luz = luminanciaRelativa(input.value);
+        aviso.textContent = luz < 0.035
+            ? 'Essa cor é bem escura e pode ficar pouco visível no fundo escuro do sistema — considere um tom mais vivo.'
+            : '';
+        aviso.className = luz < 0.035 ? 'msg error' : 'msg';
+    };
+
+    input.addEventListener('input', checar);
+    checar();
+}
+
 async function requireAuth() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {

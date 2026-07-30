@@ -14,7 +14,7 @@ async function carregarPainel(mesFoco) {
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Nenhuma meta mensal vigente neste mês.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8">${estadoVazioHTML('Nenhuma meta mensal vigente neste mês.', '🎯')}</td></tr>`;
         document.getElementById('summary').innerHTML = '';
         return;
     }
@@ -44,12 +44,13 @@ async function carregarPainel(mesFoco) {
     }
 
     const pctBatidas = (bateram + estouraram) > 0 ? bateram / (bateram + estouraram) : null;
+    const tintPct = pctBatidas === null ? 'var(--c6)' : pctBatidas >= 0.7 ? 'var(--ok)' : pctBatidas < 0.4 ? 'var(--bad)' : 'var(--pending)';
 
     document.getElementById('summary').innerHTML = `
-        <div class="stat"><div class="label">Total receitas</div><div class="value">${formatMoney(totalReceitas)}</div></div>
-        <div class="stat"><div class="label">Total despesas</div><div class="value">${formatMoney(totalDespesas)}</div></div>
-        <div class="stat"><div class="label">Reserva guardada</div><div class="value">${formatMoney(totalReserva)}</div></div>
-        <div class="stat"><div class="label">% de metas batidas</div><div class="value">${pctBatidas === null ? '—' : (pctBatidas * 100).toFixed(0) + '%'}</div></div>
+        <div class="stat" style="--tint: var(--ok)"><div class="label">Total receitas</div><div class="value">${formatMoney(totalReceitas)}</div></div>
+        <div class="stat" style="--tint: var(--bad)"><div class="label">Total despesas</div><div class="value">${formatMoney(totalDespesas)}</div></div>
+        <div class="stat" style="--tint: var(--pending)"><div class="label">Reserva guardada</div><div class="value">${formatMoney(totalReserva)}</div></div>
+        <div class="stat" style="--tint: ${tintPct}"><div class="label">% de metas batidas</div><div class="value">${pctBatidas === null ? '—' : (pctBatidas * 100).toFixed(0) + '%'}</div></div>
     `;
 }
 
