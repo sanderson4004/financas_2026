@@ -72,8 +72,8 @@
 
                 <div class="card">
                     <h2>Lançamentos</h2>
-                    <form id="filtro-form" class="row" style="align-items:flex-end; flex-wrap:wrap; margin-bottom:16px">
-                        <div style="flex:2; min-width:200px">
+                    <form id="filtro-form" class="form-filtros" style="margin-bottom:16px">
+                        <div class="busca">
                             <label for="f-busca">Buscar na descrição</label>
                             <input type="text" id="f-busca" placeholder="ex: mercado, uber...">
                         </div>
@@ -102,10 +102,8 @@
                             <label for="f-data-ate">Até</label>
                             <input type="date" id="f-data-ate">
                         </div>
-                        <div>
+                        <div class="acoes">
                             <button type="submit">Filtrar</button>
-                        </div>
-                        <div>
                             <button type="button" class="secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
