@@ -1,5 +1,4 @@
 async function carregarCategorias() {
-    const sel = document.getElementById('categoria');
     const { data, error } = await sb
         .from('categorias')
         .select('codigo, nome')
@@ -7,15 +6,16 @@ async function carregarCategorias() {
         .order('codigo');
 
     if (error) {
-        sel.innerHTML = `<option>Erro ao carregar categorias</option>`;
+        document.getElementById('categoria').innerHTML = `<option>Erro ao carregar categorias</option>`;
         return;
     }
 
-    sel.innerHTML = data.map(c => `<option value="${c.codigo}">${c.codigo} — ${c.nome}</option>`).join('');
+    const opcoes = data.map(c => `<option value="${c.codigo}">${c.codigo} — ${c.nome}</option>`).join('');
+    document.getElementById('categoria').innerHTML = opcoes;
+    document.getElementById('f-categoria').innerHTML = '<option value="">Todas</option>' + opcoes;
 }
 
 async function carregarCartoes() {
-    const sel = document.getElementById('cartao');
     const { data, error } = await sb
         .from('cartoes')
         .select('nome')
@@ -23,11 +23,23 @@ async function carregarCartoes() {
         .order('nome');
 
     if (error) {
-        sel.innerHTML = `<option>Erro ao carregar cartões</option>`;
+        document.getElementById('cartao').innerHTML = `<option>Erro ao carregar cartões</option>`;
         return;
     }
 
-    sel.innerHTML = data.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+    const opcoes = data.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+    document.getElementById('cartao').innerHTML = opcoes;
+    document.getElementById('f-cartao').innerHTML = '<option value="">Todos</option>' + opcoes;
+}
+
+function lerFiltrosCredito() {
+    return {
+        busca: document.getElementById('f-busca').value.trim(),
+        cartao: document.getElementById('f-cartao').value,
+        categoria: document.getElementById('f-categoria').value,
+        dataDe: document.getElementById('f-data-de').value,
+        dataAte: document.getElementById('f-data-ate').value,
+    };
 }
 
 function somarMeses(dataISO, n) {
@@ -49,7 +61,7 @@ function renderLinhaCompra(c, parcelas) {
         <tr id="compra-${c.id}">
             <td>${c.descricao}</td>
             <td>${c.cartao}</td>
-            <td>${c.categorias ? c.categorias.nome : (c.categoria_codigo || '—')}</td>
+            <td>${c.categorias ? pillCor(c.categorias.nome, c.categorias.cor) : (c.categoria_codigo || '—')}</td>
             <td class="num">${c.total_parcelas}x ${formatarValorParcelas(parcelas, c.valor_parcela)}</td>
             <td class="num">${formatMoney(valorTotal)}</td>
             <td class="num">${pagas}/${parcelas.length || c.total_parcelas}</td>
@@ -96,7 +108,7 @@ function renderLinhaDetalhe(c, parcelas, aberta) {
                                 ${parcelas.map(p => `
                                     <tr>
                                         <td>${p.numero_parcela}</td>
-                                        <td>${p.data_vencimento}</td>
+                                        <td>${formatDate(p.data_vencimento)}</td>
                                         <td class="num">${formatMoney(p.valor_parcela)}</td>
                                         <td>${p.pago ? '<span class="pill status-ok">PAGA</span>' : '<span class="pill status-pending">EM ABERTO</span>'}</td>
                                     </tr>
@@ -112,23 +124,33 @@ function renderLinhaDetalhe(c, parcelas, aberta) {
 
 async function carregarCompras() {
     const tbody = document.getElementById('rows');
+    const info = document.getElementById('rows-info');
     tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
-    const { data: compras, error } = await sb
-        .from('compras_credito')
-        .select('*, categorias(nome)')
-        .order('id', { ascending: false })
-        .limit(20);
+    const f = lerFiltrosCredito();
+    let query = sb.from('compras_credito').select('*, categorias(nome, cor)').order('id', { ascending: false });
+
+    if (f.busca) query = query.ilike('descricao', `%${f.busca}%`);
+    if (f.cartao) query = query.eq('cartao', f.cartao);
+    if (f.categoria) query = query.eq('categoria_codigo', f.categoria);
+    if (f.dataDe) query = query.gte('data_compra', f.dataDe);
+    if (f.dataAte) query = query.lte('data_compra', f.dataAte);
+
+    const { data: compras, error } = await query;
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar: ${error.message}</td></tr>`;
+        info.textContent = '';
         return;
     }
 
     if (compras.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhuma compra ainda.</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhuma compra encontrada.</div></td></tr>';
+        info.textContent = '';
         return;
     }
+
+    info.textContent = `${compras.length} compra(s) encontrada(s).`;
 
     const ids = compras.map(c => c.id);
     const { data: parcelas } = await sb
@@ -147,7 +169,7 @@ async function carregarCompras() {
 }
 
 async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
-    const { data: c } = await sb.from('compras_credito').select('*, categorias(nome)').eq('id', compraId).single();
+    const { data: c } = await sb.from('compras_credito').select('*, categorias(nome, cor)').eq('id', compraId).single();
     const { data: parcelas } = await sb
         .from('parcelas_credito')
         .select('id, compra_id, numero_parcela, data_vencimento, valor_parcela, pago')
@@ -172,6 +194,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarCartoes();
     await carregarCompras();
     makeSortable('rows');
+
+    document.getElementById('filtro-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        carregarCompras();
+    });
+
+    document.getElementById('f-limpar').addEventListener('click', () => {
+        document.getElementById('filtro-form').reset();
+        carregarCompras();
+    });
 
     const tbody = document.getElementById('rows');
 

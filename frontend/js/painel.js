@@ -2,7 +2,10 @@ async function carregarPainel(mesFoco) {
     const tbody = document.getElementById('rows');
     tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
 
-    const { data, error } = await sb.rpc('painel_metas_fixas', { mes_foco: mesFoco });
+    const [{ data, error }, coresCategorias] = await Promise.all([
+        sb.rpc('painel_metas_fixas', { mes_foco: mesFoco }),
+        buscarMapaCoresCategorias(),
+    ]);
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
@@ -29,7 +32,7 @@ async function carregarPainel(mesFoco) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${r.categoria_codigo}</td>
-            <td>${r.categoria_nome}</td>
+            <td>${pillCor(r.categoria_nome, coresCategorias[r.categoria_codigo])}</td>
             <td>${caraterPill(r.carater)}</td>
             <td class="num">${formatMoney(r.meta)}</td>
             <td class="num">${formatMoney(r.realizado)}</td>

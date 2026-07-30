@@ -1,11 +1,11 @@
 async function carregarRendaFixa() {
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="10">Carregando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11">Carregando...</td></tr>';
 
     const { data, error } = await sb.from('renda_fixa_detalhe').select('*').order('id');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="10">Erro ao carregar: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11">Erro ao carregar: ${error.message}</td></tr>`;
         return;
     }
 
@@ -19,10 +19,12 @@ async function carregarRendaFixa() {
             <td class="num">${r.dias_ate_vencimento}</td>
             <td class="num">${formatMoney(r.imposto_estimado)}</td>
             <td class="num">${formatMoney(r.valor_liquido_estimado)}</td>
+            <td class="num">${r.valor_liquido_informado === null ? '—' : formatMoney(r.valor_liquido_informado)}</td>
             <td class="num">${(r.percentual_carteira * 100).toFixed(1)}%</td>
             <td>
                 <div class="inline-update">
-                    <input type="number" step="0.01" value="${r.valor_bruto_atual}" id="upd-${r.id}">
+                    <input type="number" step="0.01" value="${r.valor_bruto_atual}" id="upd-bruto-${r.id}" title="Valor bruto atual">
+                    <input type="number" step="0.01" value="${r.valor_liquido_informado ?? ''}" id="upd-liquido-${r.id}" title="Valor líquido informado pelo banco" placeholder="líquido informado">
                     <button type="button" class="secondary" data-id="${r.id}">Salvar</button>
                 </div>
             </td>
@@ -32,9 +34,14 @@ async function carregarRendaFixa() {
     tbody.querySelectorAll('button[data-id]').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.getAttribute('data-id');
-            const novoValor = parseFloat(document.getElementById(`upd-${id}`).value);
+            const novoBruto = parseFloat(document.getElementById(`upd-bruto-${id}`).value);
+            const liquidoRaw = document.getElementById(`upd-liquido-${id}`).value;
             const { error } = await sb.from('investimentos_renda_fixa')
-                .update({ valor_bruto_atual: novoValor, atualizado_em: new Date().toISOString() })
+                .update({
+                    valor_bruto_atual: novoBruto,
+                    valor_liquido_informado: liquidoRaw === '' ? null : parseFloat(liquidoRaw),
+                    atualizado_em: new Date().toISOString(),
+                })
                 .eq('id', id);
             if (error) {
                 alert(`Erro ao atualizar: ${error.message}`);

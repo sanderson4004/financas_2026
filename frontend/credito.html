@@ -60,7 +60,35 @@
                 </div>
 
                 <div class="card">
-                    <h2>Compras recentes</h2>
+                    <h2>Compras</h2>
+                    <form id="filtro-form" class="row" style="align-items:flex-end; flex-wrap:wrap; margin-bottom:16px">
+                        <div style="flex:2; min-width:200px">
+                            <label for="f-busca">Buscar na descrição</label>
+                            <input type="text" id="f-busca" placeholder="ex: notebook, presente...">
+                        </div>
+                        <div>
+                            <label for="f-cartao">Cartão</label>
+                            <select id="f-cartao"><option value="">Todos</option></select>
+                        </div>
+                        <div>
+                            <label for="f-categoria">Categoria</label>
+                            <select id="f-categoria"><option value="">Todas</option></select>
+                        </div>
+                        <div>
+                            <label for="f-data-de">Compra de</label>
+                            <input type="date" id="f-data-de">
+                        </div>
+                        <div>
+                            <label for="f-data-ate">até</label>
+                            <input type="date" id="f-data-ate">
+                        </div>
+                        <div>
+                            <button type="submit">Filtrar</button>
+                        </div>
+                        <div>
+                            <button type="button" class="secondary" id="f-limpar">Limpar</button>
+                        </div>
+                    </form>
                     <div class="table-scroll">
                         <table>
                             <thead>
@@ -77,6 +105,7 @@
                             <tbody id="rows"></tbody>
                         </table>
                     </div>
+                    <div id="rows-info" class="msg" style="margin-top:10px"></div>
                 </div>
             </main>
         </div>

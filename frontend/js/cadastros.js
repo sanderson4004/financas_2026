@@ -1,11 +1,11 @@
 async function carregarCategoriasCadastro() {
     const tbody = document.getElementById('cat-rows');
-    tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
 
     const { data, error } = await sb.from('categorias').select('*').order('codigo');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="4">Erro ao carregar: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar: ${error.message}</td></tr>`;
         return;
     }
 
@@ -14,9 +14,25 @@ async function carregarCategoriasCadastro() {
             <td>${c.codigo}</td>
             <td>${c.nome}</td>
             <td>${caraterPill(c.carater)}</td>
+            <td><input type="color" id="cat-cor-${c.codigo.replace(/[^a-zA-Z0-9]/g, '')}" value="${c.cor || '#64748b'}"></td>
             <td><span class="pill ${c.status === 'ATIVA' ? 'status-ok' : 'status-pending'}">${c.status}</span></td>
+            <td><button type="button" class="secondary" data-cor-categoria="${c.codigo}">Salvar cor</button></td>
         </tr>
     `).join('');
+
+    tbody.querySelectorAll('button[data-cor-categoria]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const codigo = btn.getAttribute('data-cor-categoria');
+            const inputId = `cat-cor-${codigo.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const cor = document.getElementById(inputId).value;
+            const { error: errCor } = await sb.from('categorias').update({ cor }).eq('codigo', codigo);
+            if (errCor) {
+                alert(`Erro ao salvar cor: ${errCor.message}`);
+                return;
+            }
+            await carregarCategoriasCadastro();
+        });
+    });
 }
 
 async function carregarCategoriaSelectVigencia() {
@@ -63,34 +79,58 @@ async function carregarVigencias() {
     tbody.innerHTML = data.map(m => {
         const vigente = !m.vigencia_fim || m.vigencia_fim >= hoje;
         return `
-        <tr>
+        <tr id="vig-linha-${m.id}">
             <td>${m.categoria_codigo} — ${m.categorias ? m.categorias.nome : ''}</td>
             <td>${STATUS_LABEL_TIPO[m.tipo_teto] || m.tipo_teto}</td>
             <td>${m.janela_acumulo ? (STATUS_LABEL_JANELA[m.janela_acumulo] || m.janela_acumulo) : '—'}</td>
             <td class="num">${m.valor_teto === null ? 'auto (Reserva)' : formatMoney(m.valor_teto)}</td>
-            <td>${m.vigencia_inicio}</td>
-            <td>${m.vigencia_fim || '—'}</td>
-            <td><span class="pill ${vigente ? 'status-ok' : 'status-pending'}">${vigente ? 'VIGENTE' : 'ENCERRADA'}</span></td>
+            <td><input type="date" id="inicio-${m.id}" value="${m.vigencia_inicio}"></td>
+            <td><input type="date" id="fim-${m.id}" value="${m.vigencia_fim || ''}"></td>
+            <td id="status-${m.id}"><span class="pill ${vigente ? 'status-ok' : 'status-pending'}">${vigente ? 'VIGENTE' : 'ENCERRADA'}</span></td>
             <td>
-                ${m.vigencia_fim ? '—' : `
-                    <div class="inline-update">
-                        <input type="date" id="fim-${m.id}" value="${hoje}">
-                        <button type="button" class="secondary" data-id="${m.id}">Encerrar</button>
-                    </div>
-                `}
+                <div class="inline-update">
+                    <button type="button" class="secondary" data-limpar="${m.id}" title="Limpar data fim (deixa em aberto)">Limpar fim</button>
+                    <button type="button" data-salvar="${m.id}">Salvar</button>
+                </div>
             </td>
         </tr>
     `;
     }).join('');
 
-    tbody.querySelectorAll('button[data-id]').forEach(btn => {
+    tbody.querySelectorAll('input[type="date"]').forEach(input => {
+        input.addEventListener('change', () => {
+            const id = input.id.split('-').pop();
+            const fim = document.getElementById(`fim-${id}`).value;
+            const vigente = !fim || fim >= hoje;
+            document.getElementById(`status-${id}`).innerHTML =
+                `<span class="pill ${vigente ? 'status-ok' : 'status-pending'}">${vigente ? 'VIGENTE' : 'ENCERRADA'}</span>`;
+        });
+    });
+
+    tbody.querySelectorAll('button[data-limpar]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-limpar');
+            document.getElementById(`fim-${id}`).value = '';
+            document.getElementById(`status-${id}`).innerHTML = '<span class="pill status-ok">VIGENTE</span>';
+        });
+    });
+
+    tbody.querySelectorAll('button[data-salvar]').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const id = btn.getAttribute('data-id');
-            const novaData = document.getElementById(`fim-${id}`).value;
-            if (!novaData) { alert('Escolha uma data de fim.'); return; }
-            const { error } = await sb.from('metas').update({ vigencia_fim: novaData }).eq('id', id);
+            const id = btn.getAttribute('data-salvar');
+            const inicio = document.getElementById(`inicio-${id}`).value;
+            const fim = document.getElementById(`fim-${id}`).value;
+
+            if (!inicio) { alert('Data de início é obrigatória.'); return; }
+            if (fim && fim < inicio) { alert('A data fim não pode ser anterior à data início.'); return; }
+
+            const { error } = await sb.from('metas').update({
+                vigencia_inicio: inicio,
+                vigencia_fim: fim || null,
+            }).eq('id', id);
+
             if (error) {
-                alert(`Erro ao encerrar: ${error.message}`);
+                alert(`Erro ao salvar: ${error.message}`);
                 return;
             }
             await carregarVigencias();
@@ -106,29 +146,39 @@ function atualizarCamposVigencia() {
     document.getElementById('vig-janela-wrap').style.display = (tipo === 'VARIAVEL' && periodicidade === 'OUTRO_DELIMITADO') ? 'block' : 'none';
 }
 
-async function carregarListaCadastro(table, tbodyId) {
+async function carregarListaCadastro(table, tbodyId, temCor) {
     const tbody = document.getElementById(tbodyId);
-    tbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
+    const colspan = temCor ? 4 : 3;
+    tbody.innerHTML = `<tr><td colspan="${colspan}">Carregando...</td></tr>`;
 
     const { data, error } = await sb.from(table).select('*').order('nome');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="3">Erro ao carregar: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colspan}">Erro ao carregar: ${error.message}</td></tr>`;
         return;
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state">Nada cadastrado ainda.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${colspan}"><div class="empty-state">Nada cadastrado ainda.</div></td></tr>`;
         return;
     }
 
-    tbody.innerHTML = data.map(r => `
+    tbody.innerHTML = data.map(r => {
+        const idSeguro = r.nome.replace(/[^a-zA-Z0-9]/g, '');
+        return `
         <tr>
             <td>${r.nome}</td>
+            ${temCor ? `<td><input type="color" id="cor-${table}-${idSeguro}" value="${r.cor || '#64748b'}"></td>` : ''}
             <td><span class="pill ${r.status === 'ATIVA' ? 'status-ok' : 'status-bad'}">${r.status}</span></td>
-            <td><button type="button" class="secondary" data-nome="${r.nome.replace(/"/g, '&quot;')}" data-status="${r.status}">${r.status === 'ATIVA' ? 'Desativar' : 'Reativar'}</button></td>
+            <td>
+                <div class="inline-update">
+                    ${temCor ? `<button type="button" class="secondary" data-cor-nome="${r.nome.replace(/"/g, '&quot;')}">Salvar cor</button>` : ''}
+                    <button type="button" class="secondary" data-nome="${r.nome.replace(/"/g, '&quot;')}" data-status="${r.status}">${r.status === 'ATIVA' ? 'Desativar' : 'Reativar'}</button>
+                </div>
+            </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     tbody.querySelectorAll('button[data-nome]').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -138,12 +188,28 @@ async function carregarListaCadastro(table, tbodyId) {
                 alert(`Erro ao atualizar: ${error.message}`);
                 return;
             }
-            await carregarListaCadastro(table, tbodyId);
+            await carregarListaCadastro(table, tbodyId, temCor);
         });
     });
+
+    if (temCor) {
+        tbody.querySelectorAll('button[data-cor-nome]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const nome = btn.getAttribute('data-cor-nome');
+                const idSeguro = nome.replace(/[^a-zA-Z0-9]/g, '');
+                const cor = document.getElementById(`cor-${table}-${idSeguro}`).value;
+                const { error } = await sb.from(table).update({ cor }).eq('nome', nome);
+                if (error) {
+                    alert(`Erro ao salvar cor: ${error.message}`);
+                    return;
+                }
+                await carregarListaCadastro(table, tbodyId, temCor);
+            });
+        });
+    }
 }
 
-function wireCadastroSimples(formId, table, inputId, msgId, tbodyId) {
+function wireCadastroSimples(formId, table, inputId, msgId, tbodyId, corInputId) {
     document.getElementById(formId).addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById(msgId);
@@ -151,7 +217,10 @@ function wireCadastroSimples(formId, table, inputId, msgId, tbodyId) {
         msg.className = 'msg';
 
         const nome = document.getElementById(inputId).value.trim();
-        const { error } = await sb.from(table).insert({ nome });
+        const payload = { nome };
+        if (corInputId) payload.cor = document.getElementById(corInputId).value;
+
+        const { error } = await sb.from(table).insert(payload);
 
         if (error) {
             msg.textContent = `Erro: ${error.message}`;
@@ -162,7 +231,7 @@ function wireCadastroSimples(formId, table, inputId, msgId, tbodyId) {
         msg.textContent = 'Cadastrado com sucesso.';
         msg.className = 'msg success';
         document.getElementById(formId).reset();
-        await carregarListaCadastro(table, tbodyId);
+        await carregarListaCadastro(table, tbodyId, !!corInputId);
     });
 }
 
@@ -173,8 +242,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarCategoriasCadastro();
     await carregarCategoriaSelectVigencia();
     await carregarVigencias();
-    await carregarListaCadastro('metodos_pagamento', 'met-rows');
-    await carregarListaCadastro('cartoes', 'cart-rows');
+    await carregarListaCadastro('metodos_pagamento', 'met-rows', true);
+    await carregarListaCadastro('cartoes', 'cart-rows', false);
 
     makeSortable('cat-rows');
     makeSortable('vig-rows');
@@ -231,6 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             codigo: document.getElementById('cat-codigo').value.trim(),
             nome: document.getElementById('cat-nome').value.trim(),
             carater: document.getElementById('cat-carater').value,
+            cor: document.getElementById('cat-cor').value,
         };
 
         const { error } = await sb.from('categorias').insert(payload);
@@ -248,6 +318,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await carregarCategoriaSelectVigencia();
     });
 
-    wireCadastroSimples('metodo-form', 'metodos_pagamento', 'met-nome', 'met-msg', 'met-rows');
+    wireCadastroSimples('metodo-form', 'metodos_pagamento', 'met-nome', 'met-msg', 'met-rows', 'met-cor');
     wireCadastroSimples('cartao-form', 'cartoes', 'cart-nome', 'cart-msg', 'cart-rows');
 });
