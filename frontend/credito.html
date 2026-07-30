@@ -18,6 +18,7 @@
             <main>
                 <div class="card">
                     <h2>Nova compra no cartão</h2>
+                    <p class="msg hint">Cartão ou categoria novos? Cadastre em <a href="cadastros.html" style="color:inherit; text-decoration:underline">Cadastros</a> antes de lançar.</p>
                     <form id="credito-form" class="stack">
                         <div>
                             <label for="descricao">Descrição</label>
@@ -26,13 +27,7 @@
                         <div class="row">
                             <div>
                                 <label for="cartao">Cartão</label>
-                                <select id="cartao" required>
-                                    <option value="CC – Nubank">CC – Nubank</option>
-                                    <option value="CC - Itaú">CC - Itaú</option>
-                                    <option value="CC - VISA MP">CC - VISA MP</option>
-                                    <option value="Linha de Crédito - MP Empréstimo">Linha de Crédito - MP Empréstimo</option>
-                                    <option value="Pix">Pix</option>
-                                </select>
+                                <select id="cartao" required></select>
                             </div>
                             <div>
                                 <label for="categoria">Categoria</label>
@@ -76,6 +71,7 @@
                                     <th class="num">Parcela</th>
                                     <th class="num">Valor total</th>
                                     <th class="num">Pagas</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="rows"></tbody>

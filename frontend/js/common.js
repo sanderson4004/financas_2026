@@ -1,13 +1,14 @@
 const NAV_ITEMS = [
-    { href: 'painel.html', icon: '📊', label: 'Painel de Metas' },
-    { href: 'custos.html', icon: '📐', label: 'Custos Variáveis' },
-    { href: 'fluxo.html', icon: '💸', label: 'Fluxo' },
-    { href: 'credito.html', icon: '💳', label: 'Crédito' },
-    { href: 'caixinha.html', icon: '🐷', label: 'Caixinha Turbo' },
-    { href: 'renda-fixa.html', icon: '🏦', label: 'Renda Fixa' },
-    { href: 'bolsa.html', icon: '📈', label: 'Bolsa' },
-    { href: 'carteira.html', icon: '🧮', label: 'Carteira' },
-    { href: 'planejamento.html', icon: '🔭', label: 'Planej. Futuro' },
+    { href: 'painel.html', icon: '📊', label: 'Painel de Metas', color: '#4f8ff7' },
+    { href: 'custos.html', icon: '📐', label: 'Custos Variáveis', color: '#f5a524' },
+    { href: 'fluxo.html', icon: '💸', label: 'Fluxo', color: '#22c55e' },
+    { href: 'credito.html', icon: '💳', label: 'Crédito', color: '#fb4d67' },
+    { href: 'caixinha.html', icon: '🐷', label: 'Caixinha Turbo', color: '#06b6d4' },
+    { href: 'renda-fixa.html', icon: '🏦', label: 'Renda Fixa', color: '#ca8a04' },
+    { href: 'bolsa.html', icon: '📈', label: 'Bolsa', color: '#fb923c' },
+    { href: 'carteira.html', icon: '🧮', label: 'Carteira', color: '#64748b' },
+    { href: 'planejamento.html', icon: '🔭', label: 'Planej. Futuro', color: '#14b8a6' },
+    { href: 'cadastros.html', icon: '🗂️', label: 'Cadastros', color: '#94a3b8' },
 ];
 
 function renderSidebar() {
@@ -18,17 +19,51 @@ function renderSidebar() {
 
     el.innerHTML = `
         <div class="brand"><span class="dot"></span> Finanças 2026</div>
+        <div class="nav-label">Menu</div>
         <nav>
             ${NAV_ITEMS.map(item => `
                 <a href="${item.href}" class="${item.href === atual ? 'active' : ''}">
-                    <span class="icon">${item.icon}</span> ${item.label}
+                    <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
                 </a>
             `).join('')}
         </nav>
-        <button id="logout-btn" class="secondary logout-btn">Sair</button>
+        <div class="sidebar-footer">
+            <div class="user-chip"><span class="avatar">SA</span> Conta pessoal</div>
+            <button id="logout-btn" class="secondary logout-btn">Sair</button>
+        </div>
     `;
 
     document.getElementById('logout-btn').addEventListener('click', logout);
+}
+
+// Modal de confirmação reutilizável (substitui o confirm() nativo do navegador).
+// Uso: if (await confirmarAcao('Tem certeza que...?')) { ...excluir... }
+function confirmarAcao(mensagem, textoConfirmar) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+            <div class="modal-box">
+                <p>${mensagem}</p>
+                <div class="modal-actions">
+                    <button type="button" class="secondary" data-choice="nao">Não</button>
+                    <button type="button" class="danger" data-choice="sim">${textoConfirmar || 'Sim, excluir'}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const cleanup = (resultado) => {
+            overlay.remove();
+            resolve(resultado);
+        };
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) cleanup(false);
+        });
+        overlay.querySelector('[data-choice="nao"]').addEventListener('click', () => cleanup(false));
+        overlay.querySelector('[data-choice="sim"]').addEventListener('click', () => cleanup(true));
+    });
 }
 
 async function requireAuth() {
@@ -63,6 +98,20 @@ function statusPill(status) {
     return `<span class="pill ${statusClass(status)}">${status}</span>`;
 }
 
+const CARATER_CLASSES = {
+    'RECEITA': 'carater-receita',
+    'DESPESA': 'carater-despesa',
+    'RESERVA': 'carater-reserva',
+    'TRANSFERÊNCIA': 'carater-transferencia',
+    'EXCLUÍDO': 'carater-excluido',
+};
+
+function caraterPill(carater) {
+    if (!carater) return '';
+    const cls = CARATER_CLASSES[carater] || 'carater-transferencia';
+    return `<span class="pill ${cls}">${carater}</span>`;
+}
+
 const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 function popularSeletorMesAno(selMesId, selAnoId, anoInicial, anoFinal) {
@@ -85,4 +134,73 @@ function lerSeletorMesAnoComoData(selMesId, selAnoId) {
     const mes = document.getElementById(selMesId).value.padStart(2, '0');
     const ano = document.getElementById(selAnoId).value;
     return `${ano}-${mes}-01`;
+}
+
+// Liga o seletor de mês/ano ao mês corrente e cria o botão "Mês atual" (se
+// existir na página) para voltar rápido depois de navegar para outro mês.
+function ativarMesVigente(selMesId, selAnoId, botaoId, recarregar) {
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
+
+    definirSeletorMesAno(selMesId, selAnoId, mesAtual, anoAtual);
+
+    const botao = document.getElementById(botaoId);
+    if (botao) {
+        botao.addEventListener('click', () => {
+            definirSeletorMesAno(selMesId, selAnoId, mesAtual, anoAtual);
+            recarregar();
+        });
+    }
+}
+
+// -----------------------------------------------------------------------
+// Tabelas ordenáveis: clique no <th> ordena pelo conteúdo daquela coluna.
+// Funciona em cima de qualquer tabela com <thead> + <tbody id="tbodyId">;
+// detecta números/dinheiro automaticamente, senão ordena como texto.
+// -----------------------------------------------------------------------
+function parseValorOrdenavel(texto) {
+    const t = (texto || '').trim();
+    if (t === '' || t === '—') return null;
+
+    const soNumero = t.replace(/[^\d,.-]/g, '');
+    if (soNumero !== '' && /\d/.test(soNumero)) {
+        const normalizado = soNumero.replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+        const num = Number(normalizado);
+        if (!Number.isNaN(num)) return num;
+    }
+    return t.toLowerCase();
+}
+
+function makeSortable(tbodyId) {
+    const tbody = document.getElementById(tbodyId);
+    const table = tbody && tbody.closest('table');
+    const thead = table && table.tHead;
+    if (!thead) return;
+
+    thead.querySelectorAll('th').forEach((th, colIndex) => {
+        th.classList.add('sortable');
+        th.addEventListener('click', () => {
+            const dir = th.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc';
+            thead.querySelectorAll('th').forEach(h => h.removeAttribute('data-sort-dir'));
+            th.setAttribute('data-sort-dir', dir);
+
+            const linhas = Array.from(tbody.querySelectorAll('tr'));
+            if (linhas.length === 0 || !linhas[0].children[colIndex]) return;
+
+            linhas.sort((a, b) => {
+                const va = parseValorOrdenavel(a.children[colIndex].textContent);
+                const vb = parseValorOrdenavel(b.children[colIndex].textContent);
+                if (va === null && vb === null) return 0;
+                if (va === null) return 1;
+                if (vb === null) return -1;
+                const cmp = typeof va === 'number' && typeof vb === 'number'
+                    ? va - vb
+                    : String(va).localeCompare(String(vb), 'pt-BR');
+                return dir === 'asc' ? cmp : -cmp;
+            });
+
+            linhas.forEach(tr => tbody.appendChild(tr));
+        });
+    });
 }

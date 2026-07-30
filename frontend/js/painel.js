@@ -30,7 +30,7 @@ async function carregarPainel(mesFoco) {
         tr.innerHTML = `
             <td>${r.categoria_codigo}</td>
             <td>${r.categoria_nome}</td>
-            <td>${r.carater}</td>
+            <td>${caraterPill(r.carater)}</td>
             <td class="num">${formatMoney(r.meta)}</td>
             <td class="num">${formatMoney(r.realizado)}</td>
             <td class="num">${r.diferenca === null ? '—' : formatMoney(r.diferenca)}</td>
@@ -56,11 +56,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hoje = new Date();
     popularSeletorMesAno('mes-sel', 'ano-sel', hoje.getFullYear() - 2, hoje.getFullYear() + 2);
-    definirSeletorMesAno('mes-sel', 'ano-sel', hoje.getMonth() + 1, hoje.getFullYear());
 
     const recarregar = () => carregarPainel(lerSeletorMesAnoComoData('mes-sel', 'ano-sel'));
+    ativarMesVigente('mes-sel', 'ano-sel', 'btn-mes-atual', recarregar);
     document.getElementById('mes-sel').addEventListener('change', recarregar);
     document.getElementById('ano-sel').addEventListener('change', recarregar);
+    makeSortable('rows');
 
     recarregar();
 });

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finanças 2026 — Cadastros</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar"></aside>
+        <div class="content">
+            <header class="page-header">
+                <h1>Cadastros</h1>
+                <p>Categorias, métodos de pagamento e cartões usados em Fluxo e Crédito. Desativar em vez de apagar preserva o histórico já lançado.</p>
+            </header>
+
+            <main>
+                <div class="card">
+                    <h2>Nova categoria</h2>
+                    <form id="categoria-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="cat-codigo">Código</label>
+                                <input type="text" id="cat-codigo" required placeholder="ex: #Z">
+                            </div>
+                            <div>
+                                <label for="cat-nome">Nome</label>
+                                <input type="text" id="cat-nome" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="cat-carater">Caráter</label>
+                            <select id="cat-carater" required>
+                                <option value="RECEITA">Receita</option>
+                                <option value="DESPESA" selected>Despesa</option>
+                                <option value="RESERVA">Reserva</option>
+                            </select>
+                        </div>
+                        <button type="submit">Cadastrar categoria</button>
+                        <div id="categoria-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Categorias existentes</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>Caráter</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Nova vigência de meta</h2>
+                    <p class="msg hint">É o que faz uma categoria aparecer no Painel de Metas ou em Custos Variáveis. Sem uma vigência ativa, a categoria existe mas não entra em nenhum painel.</p>
+                    <form id="vigencia-form" class="stack">
+                        <div>
+                            <label for="vig-categoria">Categoria</label>
+                            <select id="vig-categoria" required></select>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="vig-tipo">Tipo</label>
+                                <select id="vig-tipo" required>
+                                    <option value="FIXA">Fixa — mensal, aparece no Painel de Metas</option>
+                                    <option value="VARIAVEL">Variável — aparece em Custos Variáveis</option>
+                                </select>
+                            </div>
+                            <div id="vig-valor-wrap">
+                                <label for="vig-valor">Valor da meta (R$)</label>
+                                <input type="number" id="vig-valor" step="0.01" placeholder="deixe em branco só p/ categoria Reserva">
+                            </div>
+                        </div>
+                        <div class="row" id="vig-periodicidade-wrap" style="display:none">
+                            <div>
+                                <label for="vig-periodicidade">Periodicidade</label>
+                                <select id="vig-periodicidade">
+                                    <option value="ANUAL">Anual — reinicia todo ano</option>
+                                    <option value="OUTRO_DELIMITADO">Prazo delimitado — até uma data</option>
+                                </select>
+                            </div>
+                            <div id="vig-janela-wrap" style="display:none">
+                                <label for="vig-janela">Como acumula</label>
+                                <select id="vig-janela">
+                                    <option value="MES_FOCO">Teto de gasto no mês em foco</option>
+                                    <option value="DESDE_VIGENCIA">Meta de poupança (acumula desde o início)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="vig-inicio">Vigência início</label>
+                                <input type="date" id="vig-inicio" required>
+                            </div>
+                            <div>
+                                <label for="vig-fim">Vigência fim (opcional)</label>
+                                <input type="date" id="vig-fim">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="vig-observacao">Observação (opcional)</label>
+                            <input type="text" id="vig-observacao">
+                        </div>
+                        <button type="submit">Cadastrar vigência</button>
+                        <div id="vigencia-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Vigências cadastradas</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Tipo</th>
+                                    <th>Janela</th>
+                                    <th class="num">Valor</th>
+                                    <th>Início</th>
+                                    <th>Fim</th>
+                                    <th>Status</th>
+                                    <th>Encerrar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vig-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Novo método de pagamento</h2>
+                    <p class="msg hint">Usado no <em>Método</em> da aba Fluxo (Pix, Dinheiro, cartão de débito etc.).</p>
+                    <form id="metodo-form" class="stack" style="max-width:360px">
+                        <div>
+                            <label for="met-nome">Nome</label>
+                            <input type="text" id="met-nome" required placeholder="ex: CC - Bradesco">
+                        </div>
+                        <button type="submit">Cadastrar método</button>
+                        <div id="met-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Métodos cadastrados</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="met-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Novo cartão</h2>
+                    <p class="msg hint">Usado no <em>Cartão</em> da aba Crédito.</p>
+                    <form id="cartao-form" class="stack" style="max-width:360px">
+                        <div>
+                            <label for="cart-nome">Nome</label>
+                            <input type="text" id="cart-nome" required placeholder="ex: CC - Bradesco">
+                        </div>
+                        <button type="submit">Cadastrar cartão</button>
+                        <div id="cart-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Cartões cadastrados</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cadastros.js"></script>
+</body>
+</html>
