@@ -150,12 +150,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // lateral (Renda Fixa, Bolsa, Caixinha Turbo).
     const CORES_FONTE = { 'Renda Fixa': '#ca8a04', 'Bolsa': '#fb923c', 'Caixinha Turbo': '#06b6d4' };
 
-    document.getElementById('resumo').innerHTML = `
-        <div class="stat" style="--tint: var(--accent)"><div class="label">Patrimônio total</div><div class="value">${formatMoney(data.patrimonio_total)}</div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Renda Fixa']}"><div class="label">Renda Fixa</div><div class="value">${formatMoney(data.total_renda_fixa)}</div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Bolsa']}"><div class="label">Bolsa</div><div class="value">${formatMoney(data.total_bolsa)}</div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Caixinha Turbo']}"><div class="label">Caixinha Turbo</div><div class="value">${formatMoney(data.total_caixinha_turbo)}</div></div>
+    const resumoEl = document.getElementById('resumo');
+    resumoEl.innerHTML = `
+        <div class="stat" style="--tint: var(--accent)"><div class="label">Patrimônio total</div><div class="value" data-contagem="${Number(data.patrimonio_total)}"></div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Renda Fixa']}"><div class="label">Renda Fixa</div><div class="value" data-contagem="${Number(data.total_renda_fixa)}"></div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Bolsa']}"><div class="label">Bolsa</div><div class="value" data-contagem="${Number(data.total_bolsa)}"></div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Caixinha Turbo']}"><div class="label">Caixinha Turbo</div><div class="value" data-contagem="${Number(data.total_caixinha_turbo)}"></div></div>
     `;
+    animarContagens(resumoEl);
 
     document.getElementById('rows').innerHTML = `
         <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Renda Fixa']}"></span>Renda Fixa</td><td class="num">${formatMoney(data.total_renda_fixa)}</td><td class="num">${(data.pct_renda_fixa * 100).toFixed(1)}%</td></tr>

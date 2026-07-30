@@ -1,15 +1,16 @@
 const NAV_ITEMS = [
-    { href: 'painel.html', icon: '📊', label: 'Painel de Metas', color: '#4f8ff7' },
-    { href: 'custos.html', icon: '📐', label: 'Custos Variáveis', color: '#f5a524' },
-    { href: 'fluxo.html', icon: '💸', label: 'Fluxo', color: '#22c55e' },
-    { href: 'credito.html', icon: '💳', label: 'Crédito', color: '#fb4d67' },
-    { href: 'caixinha.html', icon: '🐷', label: 'Caixinha Turbo', color: '#06b6d4' },
-    { href: 'renda-fixa.html', icon: '🏦', label: 'Renda Fixa', color: '#ca8a04' },
-    { href: 'bolsa.html', icon: '📈', label: 'Bolsa', color: '#fb923c' },
-    { href: 'carteira.html', icon: '🧮', label: 'Carteira', color: '#64748b' },
-    { href: 'planejamento.html', icon: '🔭', label: 'Planej. Futuro', color: '#14b8a6' },
+    { href: 'painel.html', label: 'Painel de Metas', color: '#5285f5', svg: '<rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>' },
+    { href: 'custos.html', label: 'Custos Variáveis', color: '#eeab3d', svg: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>' },
+    { href: 'fluxo.html', label: 'Fluxo', color: '#30cb8c', svg: '<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>' },
+    { href: 'credito.html', label: 'Crédito', color: '#f8586f', svg: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>' },
+    { href: 'caixinha.html', label: 'Caixinha Turbo', color: '#22c5dd', svg: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>' },
+    { href: 'renda-fixa.html', label: 'Renda Fixa', color: '#c99a2e', svg: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M14 9h1M14 13h1"/>' },
+    { href: 'bolsa.html', label: 'Bolsa', color: '#f2934f', svg: '<path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-7"/>' },
+    { href: 'carteira.html', label: 'Carteira', color: '#8b93a5', svg: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>' },
+    { href: 'planejamento.html', label: 'Planej. Futuro', color: '#14b8a6', svg: '<path d="M4 22V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/>' },
     {
-        label: 'Cadastros', icon: '🗂️', color: '#94a3b8', group: true,
+        label: 'Cadastros', color: '#94a3b8', group: true,
+        svg: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
         children: [
             { href: 'cadastros.html#categorias', label: 'Categorias' },
             { href: 'cadastros.html#vigencias', label: 'Vigências de meta' },
@@ -18,6 +19,9 @@ const NAV_ITEMS = [
         ],
     },
 ];
+
+const SVG_ABERTO = '<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+function iconeSvg(pathsInternos) { return `${SVG_ABERTO}${pathsInternos}</svg>`; }
 
 function renderSidebar() {
     const el = document.getElementById('app-sidebar');
@@ -34,7 +38,7 @@ function renderSidebar() {
                     const abertoPorPadrao = atual === 'cadastros.html';
                     return `
                         <button type="button" class="nav-group-toggle ${abertoPorPadrao ? 'active' : ''}" data-group="${i}" aria-expanded="${abertoPorPadrao}" aria-controls="nav-sub-${i}">
-                            <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
+                            <span class="icon" style="--tint: ${item.color}">${iconeSvg(item.svg)}</span> ${item.label}
                             <span class="chevron">›</span>
                         </button>
                         <div class="nav-sub" id="nav-sub-${i}" style="${abertoPorPadrao ? '' : 'display:none'}">
@@ -44,12 +48,17 @@ function renderSidebar() {
                 }
                 return `
                     <a href="${item.href}" class="${item.href === atual ? 'active' : ''}">
-                        <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
+                        <span class="icon" style="--tint: ${item.color}">${iconeSvg(item.svg)}</span> ${item.label}
                     </a>
                 `;
             }).join('')}
         </nav>
         <div class="sidebar-footer">
+            <div class="theme-switch" id="theme-switch" role="button" tabindex="0" aria-label="Alternar tema claro/escuro">
+                <span class="icone-tema escuro">${iconeSvg('<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>')}<span>Escuro</span></span>
+                <span class="icone-tema claro">${iconeSvg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>')}<span>Claro</span></span>
+                <span class="thumb"></span>
+            </div>
             <div class="user-chip"><span class="avatar">SA</span> Conta pessoal</div>
             <button id="logout-btn" class="secondary logout-btn">Sair</button>
         </div>
@@ -66,6 +75,65 @@ function renderSidebar() {
             btn.setAttribute('aria-expanded', String(abrindo));
         });
     });
+
+    ligarThemeSwitch();
+}
+
+// -----------------------------------------------------------------------
+// Tema claro/escuro — persistido em localStorage, aplicado antes da
+// primeira pintura (script inline no <head> de cada página evita o
+// "flash" do tema errado). Sem preferência salva, segue o SO.
+// -----------------------------------------------------------------------
+function temaAtual() {
+    return document.documentElement.getAttribute('data-theme')
+        || (matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'escuro');
+}
+
+function aplicarTema(tema) {
+    document.documentElement.setAttribute('data-theme', tema);
+    localStorage.setItem('tema', tema);
+    const switchEl = document.getElementById('theme-switch');
+    if (switchEl) switchEl.setAttribute('data-tema', tema);
+}
+
+function ligarThemeSwitch() {
+    const switchEl = document.getElementById('theme-switch');
+    if (!switchEl) return;
+    switchEl.setAttribute('data-tema', temaAtual());
+    const alternar = () => aplicarTema(temaAtual() === 'claro' ? 'escuro' : 'claro');
+    switchEl.addEventListener('click', alternar);
+    switchEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); }
+    });
+}
+
+// -----------------------------------------------------------------------
+// Contagem animada — números "sobem" do zero até o valor final ao
+// carregar a tela. Chame depois de colocar o valor final no elemento.
+// -----------------------------------------------------------------------
+// Anima todos os elementos com [data-contagem="valorFinal"] dentro de um
+// container — conveniência pra não chamar animarContagem() um por um.
+function animarContagens(container) {
+    (container || document).querySelectorAll('[data-contagem]').forEach(el => {
+        animarContagem(el, parseFloat(el.getAttribute('data-contagem')));
+    });
+}
+
+function animarContagem(el, valorFinal, opcoes) {
+    const formatador = (opcoes && opcoes.formatar) || formatMoney;
+    const duracao = (opcoes && opcoes.duracaoMs) || 900;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !Number.isFinite(valorFinal)) {
+        el.textContent = formatador(valorFinal);
+        return;
+    }
+    const inicio = performance.now();
+    function passo(agora) {
+        const t = Math.min(1, (agora - inicio) / duracao);
+        const facilitado = 1 - Math.pow(1 - t, 3);
+        el.textContent = formatador(valorFinal * facilitado);
+        if (t < 1) requestAnimationFrame(passo);
+    }
+    requestAnimationFrame(passo);
 }
 
 // Modal de confirmação reutilizável (substitui o confirm() nativo do navegador).
@@ -194,12 +262,16 @@ function vigiarContrasteCor(inputId, avisoId) {
     const aviso = document.getElementById(avisoId);
     if (!input || !aviso) return;
 
+    // Agora que o sistema tem dois temas, a mesma cor cadastrada vale pros
+    // dois: escura demais some no fundo escuro, clara demais some no fundo
+    // claro — então o meio-termo é o que funciona em ambos.
     const checar = () => {
         const luz = luminanciaRelativa(input.value);
-        aviso.textContent = luz < 0.035
-            ? 'Essa cor é bem escura e pode ficar pouco visível no fundo escuro do sistema — considere um tom mais vivo.'
-            : '';
-        aviso.className = luz < 0.035 ? 'msg error' : 'msg';
+        let mensagem = '';
+        if (luz < 0.035) mensagem = 'Essa cor é bem escura e pode ficar pouco visível no tema escuro — considere um tom mais vivo.';
+        else if (luz > 0.78) mensagem = 'Essa cor é bem clara e pode ficar pouco visível no tema claro — considere um tom mais vivo.';
+        aviso.textContent = mensagem;
+        aviso.className = mensagem ? 'msg error' : 'msg';
     };
 
     input.addEventListener('input', checar);
