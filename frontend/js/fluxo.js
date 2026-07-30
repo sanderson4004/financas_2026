@@ -22,9 +22,10 @@ async function carregarSaldos() {
     el.innerHTML = data.map(s => `
         <div class="stat" style="--tint: ${Number(s.saldo) < 0 ? 'var(--bad)' : 'var(--ok)'}">
             <div class="label">${LABEL_SALDO_METODO[s.metodo] || s.metodo}</div>
-            <div class="value">${formatMoney(s.saldo)}</div>
+            <div class="value" data-contagem="${Number(s.saldo)}"></div>
         </div>
     `).join('');
+    animarContagens(el);
 }
 
 async function carregarCategorias() {

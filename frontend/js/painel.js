@@ -46,12 +46,14 @@ async function carregarPainel(mesFoco) {
     const pctBatidas = (bateram + estouraram) > 0 ? bateram / (bateram + estouraram) : null;
     const tintPct = pctBatidas === null ? 'var(--c6)' : pctBatidas >= 0.7 ? 'var(--ok)' : pctBatidas < 0.4 ? 'var(--bad)' : 'var(--pending)';
 
-    document.getElementById('summary').innerHTML = `
-        <div class="stat" style="--tint: var(--ok)"><div class="label">Total receitas</div><div class="value">${formatMoney(totalReceitas)}</div></div>
-        <div class="stat" style="--tint: var(--bad)"><div class="label">Total despesas</div><div class="value">${formatMoney(totalDespesas)}</div></div>
-        <div class="stat" style="--tint: var(--pending)"><div class="label">Reserva guardada</div><div class="value">${formatMoney(totalReserva)}</div></div>
+    const summaryEl = document.getElementById('summary');
+    summaryEl.innerHTML = `
+        <div class="stat" style="--tint: var(--ok)"><div class="label">Total receitas</div><div class="value" data-contagem="${totalReceitas}"></div></div>
+        <div class="stat" style="--tint: var(--bad)"><div class="label">Total despesas</div><div class="value" data-contagem="${totalDespesas}"></div></div>
+        <div class="stat" style="--tint: var(--pending)"><div class="label">Reserva guardada</div><div class="value" data-contagem="${totalReserva}"></div></div>
         <div class="stat" style="--tint: ${tintPct}"><div class="label">% de metas batidas</div><div class="value">${pctBatidas === null ? '—' : (pctBatidas * 100).toFixed(0) + '%'}</div></div>
     `;
+    animarContagens(summaryEl);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
