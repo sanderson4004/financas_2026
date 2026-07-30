@@ -33,7 +33,7 @@ function renderSidebar() {
                 if (item.group) {
                     const abertoPorPadrao = atual === 'cadastros.html';
                     return `
-                        <button type="button" class="nav-group-toggle ${abertoPorPadrao ? 'active' : ''}" data-group="${i}">
+                        <button type="button" class="nav-group-toggle ${abertoPorPadrao ? 'active' : ''}" data-group="${i}" aria-expanded="${abertoPorPadrao}" aria-controls="nav-sub-${i}">
                             <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
                             <span class="chevron">›</span>
                         </button>
@@ -63,6 +63,7 @@ function renderSidebar() {
             const abrindo = sub.style.display === 'none';
             sub.style.display = abrindo ? 'flex' : 'none';
             btn.classList.toggle('active', abrindo);
+            btn.setAttribute('aria-expanded', String(abrindo));
         });
     });
 }
@@ -95,6 +96,52 @@ function confirmarAcao(mensagem, textoConfirmar) {
         overlay.querySelector('[data-choice="nao"]').addEventListener('click', () => cleanup(false));
         overlay.querySelector('[data-choice="sim"]').addEventListener('click', () => cleanup(true));
     });
+}
+
+// -----------------------------------------------------------------------
+// Estados de carregamento e erro reutilizáveis (tabelas e blocos avulsos).
+// Erro sempre vem com um botão "Tentar de novo" ligado à mesma função que
+// carregou os dados da primeira vez — sem isso, um erro de rede deixava a
+// tela travada até o usuário dar F5.
+// -----------------------------------------------------------------------
+function carregandoHTML(texto) {
+    return `<span class="state-inline"><span class="spinner" aria-hidden="true"></span>${texto || 'Carregando...'}</span>`;
+}
+
+function carregandoLinhaHTML(colspan, texto) {
+    return `<tr><td colspan="${colspan}">${carregandoHTML(texto)}</td></tr>`;
+}
+
+function erroHTML(mensagem) {
+    return `
+        <div class="state-erro">
+            <span>Erro ao carregar: ${mensagem}</span>
+            <button type="button" class="secondary btn-tentar-de-novo">Tentar de novo</button>
+        </div>
+    `;
+}
+
+function renderErro(elemento, mensagem, retry) {
+    elemento.innerHTML = erroHTML(mensagem);
+    elemento.querySelector('.btn-tentar-de-novo').addEventListener('click', retry, { once: true });
+}
+
+function renderErroLinha(tbody, colspan, mensagem, retry) {
+    tbody.innerHTML = `<tr><td colspan="${colspan}">${erroHTML(mensagem)}</td></tr>`;
+    tbody.querySelector('.btn-tentar-de-novo').addEventListener('click', retry, { once: true });
+}
+
+// Desabilita um botão enquanto a ação assíncrona roda — evita duplo
+// clique/lançamento duplicado (ex: clicar 2x rápido em "Lançar"). Reabilita
+// mesmo se a ação lançar erro.
+async function comBotaoOcupado(botao, acao) {
+    if (!botao) return acao();
+    botao.disabled = true;
+    try {
+        return await acao();
+    } finally {
+        botao.disabled = false;
+    }
 }
 
 async function requireAuth() {

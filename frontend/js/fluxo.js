@@ -10,7 +10,7 @@ async function carregarSaldos() {
     const { data, error } = await sb.from('fluxo_saldo_por_metodo').select('*');
 
     if (error) {
-        el.innerHTML = `<div class="msg error">Erro ao carregar saldos: ${error.message}</div>`;
+        renderErro(el, error.message, carregarSaldos);
         return;
     }
 
@@ -75,7 +75,7 @@ function lerFiltros() {
 async function carregarLancamentos() {
     const tbody = document.getElementById('rows');
     const info = document.getElementById('rows-info');
-    tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(7);
 
     if (Object.keys(coresMetodosCache).length === 0) {
         coresMetodosCache = await buscarMapaCoresMetodos();
@@ -94,7 +94,7 @@ async function carregarLancamentos() {
     const { data, error } = await query;
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 7, error.message, carregarLancamentos);
         info.textContent = '';
         return;
     }
@@ -124,13 +124,15 @@ async function carregarLancamentos() {
             const ok = await confirmarAcao('Tem certeza que deseja excluir este lançamento?');
             if (!ok) return;
 
-            const { error: errDel } = await sb.from('lancamentos_fluxo').delete().eq('id', btn.getAttribute('data-id'));
-            if (errDel) {
-                alert(`Erro ao excluir: ${errDel.message}`);
-                return;
-            }
-            await carregarLancamentos();
-            await carregarSaldos();
+            await comBotaoOcupado(btn, async () => {
+                const { error: errDel } = await sb.from('lancamentos_fluxo').delete().eq('id', btn.getAttribute('data-id'));
+                if (errDel) {
+                    alert(`Erro ao excluir: ${errDel.message}`);
+                    return;
+                }
+                await carregarLancamentos();
+                await carregarSaldos();
+            });
         });
     });
 }
@@ -174,33 +176,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('fluxo-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const carater = document.getElementById('carater').value;
+        await comBotaoOcupado(btn, async () => {
+            const carater = document.getElementById('carater').value;
 
-        const payload = {
-            carater,
-            valor: ajustarSinalValor(carater, parseFloat(document.getElementById('valor').value)),
-            data_movimento: document.getElementById('data_movimento').value || null,
-            data_pagamento: document.getElementById('data_pagamento').value || null,
-            metodo: document.getElementById('metodo').value,
-            categoria_codigo: document.getElementById('categoria').value,
-            descricao: document.getElementById('descricao').value || null,
-        };
+            const payload = {
+                carater,
+                valor: ajustarSinalValor(carater, parseFloat(document.getElementById('valor').value)),
+                data_movimento: document.getElementById('data_movimento').value || null,
+                data_pagamento: document.getElementById('data_pagamento').value || null,
+                metodo: document.getElementById('metodo').value,
+                categoria_codigo: document.getElementById('categoria').value,
+                descricao: document.getElementById('descricao').value || null,
+            };
 
-        const { error } = await sb.from('lancamentos_fluxo').insert(payload);
+            const { error } = await sb.from('lancamentos_fluxo').insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Lançamento salvo.';
-        msg.className = 'msg success';
-        document.getElementById('fluxo-form').reset();
-        await carregarLancamentos();
-        await carregarSaldos();
+            msg.textContent = 'Lançamento salvo.';
+            msg.className = 'msg success';
+            document.getElementById('fluxo-form').reset();
+            await carregarLancamentos();
+            await carregarSaldos();
+        });
     });
 });

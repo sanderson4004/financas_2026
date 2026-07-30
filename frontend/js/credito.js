@@ -125,7 +125,7 @@ function renderLinhaDetalhe(c, parcelas, aberta) {
 async function carregarCompras() {
     const tbody = document.getElementById('rows');
     const info = document.getElementById('rows-info');
-    tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(7);
 
     const f = lerFiltrosCredito();
     let query = sb.from('compras_credito').select('*, categorias(nome, cor)').order('id', { ascending: false });
@@ -139,7 +139,7 @@ async function carregarCompras() {
     const { data: compras, error } = await query;
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 7, error.message, carregarCompras);
         info.textContent = '';
         return;
     }
@@ -221,12 +221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ok = await confirmarAcao('Tem certeza que deseja excluir esta compra e todas as suas parcelas? Essa ação não pode ser desfeita.');
             if (!ok) return;
 
-            const { error } = await sb.from('compras_credito').delete().eq('id', id);
-            if (error) {
-                alert(`Erro ao excluir: ${error.message}`);
-                return;
-            }
-            await carregarCompras();
+            await comBotaoOcupado(delBtn, async () => {
+                const { error } = await sb.from('compras_credito').delete().eq('id', id);
+                if (error) {
+                    alert(`Erro ao excluir: ${error.message}`);
+                    return;
+                }
+                await carregarCompras();
+            });
         }
     });
 
@@ -240,6 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ate = parseInt(form.querySelector('.range-ate').value, 10);
         const novoValor = parseFloat(form.querySelector('.range-valor').value);
         const msg = document.getElementById(`parcelas-msg-${compraId}`);
+        const btn = form.querySelector('button[type="submit"]');
 
         if (!de || !ate || de > ate || isNaN(novoValor)) {
             msg.textContent = 'Preencha um intervalo válido (nº inicial ≤ nº final) e o novo valor.';
@@ -250,28 +253,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const { error } = await sb
-            .from('parcelas_credito')
-            .update({ valor_parcela: novoValor })
-            .eq('compra_id', compraId)
-            .gte('numero_parcela', de)
-            .lte('numero_parcela', ate);
+        await comBotaoOcupado(btn, async () => {
+            const { error } = await sb
+                .from('parcelas_credito')
+                .update({ valor_parcela: novoValor })
+                .eq('compra_id', compraId)
+                .gte('numero_parcela', de)
+                .lte('numero_parcela', ate);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        await atualizarLinhaCompra(compraId, true, `Parcelas ${de} a ${ate} atualizadas para ${formatMoney(novoValor)}.`);
+            await atualizarLinhaCompra(compraId, true, `Parcelas ${de} a ${ate} atualizadas para ${formatMoney(novoValor)}.`);
+        });
     });
 
     document.getElementById('credito-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
+        await comBotaoOcupado(btn, () => salvarNovaCompra(msg));
+    });
 
+    async function salvarNovaCompra(msg) {
         const totalParcelas = parseInt(document.getElementById('total_parcelas').value, 10);
         const valorParcela = parseFloat(document.getElementById('valor_parcela').value);
         const dataPrimeiroVencimento = document.getElementById('data_primeiro_vencimento').value;
@@ -324,5 +333,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('credito-form').reset();
         document.getElementById('total_parcelas').value = 1;
         await carregarCompras();
-    });
+    }
 });

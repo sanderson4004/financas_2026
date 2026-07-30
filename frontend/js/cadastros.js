@@ -1,11 +1,11 @@
 async function carregarCategoriasCadastro() {
     const tbody = document.getElementById('cat-rows');
-    tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(6);
 
     const { data, error } = await sb.from('categorias').select('*').order('codigo');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 6, error.message, carregarCategoriasCadastro);
         return;
     }
 
@@ -22,15 +22,17 @@ async function carregarCategoriasCadastro() {
 
     tbody.querySelectorAll('button[data-cor-categoria]').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const codigo = btn.getAttribute('data-cor-categoria');
-            const inputId = `cat-cor-${codigo.replace(/[^a-zA-Z0-9]/g, '')}`;
-            const cor = document.getElementById(inputId).value;
-            const { error: errCor } = await sb.from('categorias').update({ cor }).eq('codigo', codigo);
-            if (errCor) {
-                alert(`Erro ao salvar cor: ${errCor.message}`);
-                return;
-            }
-            await carregarCategoriasCadastro();
+            await comBotaoOcupado(btn, async () => {
+                const codigo = btn.getAttribute('data-cor-categoria');
+                const inputId = `cat-cor-${codigo.replace(/[^a-zA-Z0-9]/g, '')}`;
+                const cor = document.getElementById(inputId).value;
+                const { error: errCor } = await sb.from('categorias').update({ cor }).eq('codigo', codigo);
+                if (errCor) {
+                    alert(`Erro ao salvar cor: ${errCor.message}`);
+                    return;
+                }
+                await carregarCategoriasCadastro();
+            });
         });
     });
 }
@@ -56,7 +58,7 @@ const STATUS_LABEL_JANELA = { MES_FOCO: 'Teto no mês', ANO_FOCO: 'Teto no ano',
 
 async function carregarVigencias() {
     const tbody = document.getElementById('vig-rows');
-    tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(8);
 
     const { data, error } = await sb
         .from('metas')
@@ -65,7 +67,7 @@ async function carregarVigencias() {
         .order('vigencia_inicio', { ascending: false });
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 8, error.message, carregarVigencias);
         return;
     }
 
@@ -124,16 +126,18 @@ async function carregarVigencias() {
             if (!inicio) { alert('Data de início é obrigatória.'); return; }
             if (fim && fim < inicio) { alert('A data fim não pode ser anterior à data início.'); return; }
 
-            const { error } = await sb.from('metas').update({
-                vigencia_inicio: inicio,
-                vigencia_fim: fim || null,
-            }).eq('id', id);
+            await comBotaoOcupado(btn, async () => {
+                const { error } = await sb.from('metas').update({
+                    vigencia_inicio: inicio,
+                    vigencia_fim: fim || null,
+                }).eq('id', id);
 
-            if (error) {
-                alert(`Erro ao salvar: ${error.message}`);
-                return;
-            }
-            await carregarVigencias();
+                if (error) {
+                    alert(`Erro ao salvar: ${error.message}`);
+                    return;
+                }
+                await carregarVigencias();
+            });
         });
     });
 }
@@ -149,12 +153,12 @@ function atualizarCamposVigencia() {
 async function carregarListaCadastro(table, tbodyId, temCor) {
     const tbody = document.getElementById(tbodyId);
     const colspan = temCor ? 4 : 3;
-    tbody.innerHTML = `<tr><td colspan="${colspan}">Carregando...</td></tr>`;
+    tbody.innerHTML = carregandoLinhaHTML(colspan);
 
     const { data, error } = await sb.from(table).select('*').order('nome');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="${colspan}">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, colspan, error.message, () => carregarListaCadastro(table, tbodyId, temCor));
         return;
     }
 
@@ -182,28 +186,32 @@ async function carregarListaCadastro(table, tbodyId, temCor) {
 
     tbody.querySelectorAll('button[data-nome]').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const novoStatus = btn.getAttribute('data-status') === 'ATIVA' ? 'INATIVA' : 'ATIVA';
-            const { error } = await sb.from(table).update({ status: novoStatus }).eq('nome', btn.getAttribute('data-nome'));
-            if (error) {
-                alert(`Erro ao atualizar: ${error.message}`);
-                return;
-            }
-            await carregarListaCadastro(table, tbodyId, temCor);
+            await comBotaoOcupado(btn, async () => {
+                const novoStatus = btn.getAttribute('data-status') === 'ATIVA' ? 'INATIVA' : 'ATIVA';
+                const { error } = await sb.from(table).update({ status: novoStatus }).eq('nome', btn.getAttribute('data-nome'));
+                if (error) {
+                    alert(`Erro ao atualizar: ${error.message}`);
+                    return;
+                }
+                await carregarListaCadastro(table, tbodyId, temCor);
+            });
         });
     });
 
     if (temCor) {
         tbody.querySelectorAll('button[data-cor-nome]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const nome = btn.getAttribute('data-cor-nome');
-                const idSeguro = nome.replace(/[^a-zA-Z0-9]/g, '');
-                const cor = document.getElementById(`cor-${table}-${idSeguro}`).value;
-                const { error } = await sb.from(table).update({ cor }).eq('nome', nome);
-                if (error) {
-                    alert(`Erro ao salvar cor: ${error.message}`);
-                    return;
-                }
-                await carregarListaCadastro(table, tbodyId, temCor);
+                await comBotaoOcupado(btn, async () => {
+                    const nome = btn.getAttribute('data-cor-nome');
+                    const idSeguro = nome.replace(/[^a-zA-Z0-9]/g, '');
+                    const cor = document.getElementById(`cor-${table}-${idSeguro}`).value;
+                    const { error } = await sb.from(table).update({ cor }).eq('nome', nome);
+                    if (error) {
+                        alert(`Erro ao salvar cor: ${error.message}`);
+                        return;
+                    }
+                    await carregarListaCadastro(table, tbodyId, temCor);
+                });
             });
         });
     }
@@ -213,25 +221,28 @@ function wireCadastroSimples(formId, table, inputId, msgId, tbodyId, corInputId)
     document.getElementById(formId).addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById(msgId);
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const nome = document.getElementById(inputId).value.trim();
-        const payload = { nome };
-        if (corInputId) payload.cor = document.getElementById(corInputId).value;
+        await comBotaoOcupado(btn, async () => {
+            const nome = document.getElementById(inputId).value.trim();
+            const payload = { nome };
+            if (corInputId) payload.cor = document.getElementById(corInputId).value;
 
-        const { error } = await sb.from(table).insert(payload);
+            const { error } = await sb.from(table).insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Cadastrado com sucesso.';
-        msg.className = 'msg success';
-        document.getElementById(formId).reset();
-        await carregarListaCadastro(table, tbodyId, !!corInputId);
+            msg.textContent = 'Cadastrado com sucesso.';
+            msg.className = 'msg success';
+            document.getElementById(formId).reset();
+            await carregarListaCadastro(table, tbodyId, !!corInputId);
+        });
     });
 }
 
@@ -257,65 +268,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('vigencia-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('vigencia-msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const tipo = document.getElementById('vig-tipo').value;
-        const periodicidade = document.getElementById('vig-periodicidade').value;
-        const janela = document.getElementById('vig-janela').value;
-        const valorRaw = document.getElementById('vig-valor').value;
+        await comBotaoOcupado(btn, async () => {
+            const tipo = document.getElementById('vig-tipo').value;
+            const periodicidade = document.getElementById('vig-periodicidade').value;
+            const janela = document.getElementById('vig-janela').value;
+            const valorRaw = document.getElementById('vig-valor').value;
 
-        const payload = {
-            categoria_codigo: document.getElementById('vig-categoria').value,
-            vigencia_inicio: document.getElementById('vig-inicio').value,
-            vigencia_fim: document.getElementById('vig-fim').value || null,
-            valor_teto: valorRaw === '' ? null : parseFloat(valorRaw),
-            observacao: document.getElementById('vig-observacao').value || null,
-            tipo_teto: tipo === 'FIXA' ? 'MENSAL' : periodicidade,
-            janela_acumulo: tipo === 'FIXA' ? null : (periodicidade === 'ANUAL' ? 'ANO_FOCO' : janela),
-        };
+            const payload = {
+                categoria_codigo: document.getElementById('vig-categoria').value,
+                vigencia_inicio: document.getElementById('vig-inicio').value,
+                vigencia_fim: document.getElementById('vig-fim').value || null,
+                valor_teto: valorRaw === '' ? null : parseFloat(valorRaw),
+                observacao: document.getElementById('vig-observacao').value || null,
+                tipo_teto: tipo === 'FIXA' ? 'MENSAL' : periodicidade,
+                janela_acumulo: tipo === 'FIXA' ? null : (periodicidade === 'ANUAL' ? 'ANO_FOCO' : janela),
+            };
 
-        const { error } = await sb.from('metas').insert(payload);
+            const { error } = await sb.from('metas').insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Vigência cadastrada.';
-        msg.className = 'msg success';
-        document.getElementById('vigencia-form').reset();
-        atualizarCamposVigencia();
-        await carregarVigencias();
+            msg.textContent = 'Vigência cadastrada.';
+            msg.className = 'msg success';
+            document.getElementById('vigencia-form').reset();
+            atualizarCamposVigencia();
+            await carregarVigencias();
+        });
     });
 
     document.getElementById('categoria-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('categoria-msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const payload = {
-            codigo: document.getElementById('cat-codigo').value.trim(),
-            nome: document.getElementById('cat-nome').value.trim(),
-            carater: document.getElementById('cat-carater').value,
-            cor: document.getElementById('cat-cor').value,
-        };
+        await comBotaoOcupado(btn, async () => {
+            const payload = {
+                codigo: document.getElementById('cat-codigo').value.trim(),
+                nome: document.getElementById('cat-nome').value.trim(),
+                carater: document.getElementById('cat-carater').value,
+                cor: document.getElementById('cat-cor').value,
+            };
 
-        const { error } = await sb.from('categorias').insert(payload);
+            const { error } = await sb.from('categorias').insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Categoria cadastrada.';
-        msg.className = 'msg success';
-        document.getElementById('categoria-form').reset();
-        await carregarCategoriasCadastro();
-        await carregarCategoriaSelectVigencia();
+            msg.textContent = 'Categoria cadastrada.';
+            msg.className = 'msg success';
+            document.getElementById('categoria-form').reset();
+            await carregarCategoriasCadastro();
+            await carregarCategoriaSelectVigencia();
+        });
     });
 
     wireCadastroSimples('metodo-form', 'metodos_pagamento', 'met-nome', 'met-msg', 'met-rows', 'met-cor');

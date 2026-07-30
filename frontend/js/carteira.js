@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await sb.from('carteira_consolidada').select('*').single();
 
     if (error) {
-        document.getElementById('resumo').innerHTML = `<div class="msg error">Erro: ${error.message}</div>`;
+        renderErro(document.getElementById('resumo'), error.message, () => window.location.reload());
         return;
     }
 

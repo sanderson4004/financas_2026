@@ -1,6 +1,6 @@
 async function carregarPainel(mesFoco) {
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(8);
 
     const [{ data, error }, coresCategorias] = await Promise.all([
         sb.rpc('painel_metas_fixas', { mes_foco: mesFoco }),
@@ -8,7 +8,7 @@ async function carregarPainel(mesFoco) {
     ]);
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 8, error.message, () => carregarPainel(mesFoco));
         document.getElementById('summary').innerHTML = '';
         return;
     }
