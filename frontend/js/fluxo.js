@@ -15,12 +15,12 @@ async function carregarSaldos() {
     }
 
     if (!data || data.length === 0) {
-        el.innerHTML = '<div class="empty-state">Nenhum lançamento ainda.</div>';
+        el.innerHTML = estadoVazioHTML('Nenhum lançamento ainda. Lance o primeiro no formulário abaixo.', '💸');
         return;
     }
 
     el.innerHTML = data.map(s => `
-        <div class="stat">
+        <div class="stat" style="--tint: ${Number(s.saldo) < 0 ? 'var(--bad)' : 'var(--ok)'}">
             <div class="label">${LABEL_SALDO_METODO[s.metodo] || s.metodo}</div>
             <div class="value">${formatMoney(s.saldo)}</div>
         </div>
@@ -100,7 +100,7 @@ async function carregarLancamentos() {
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="7">${estadoVazioHTML('Nenhum lançamento encontrado com esses filtros.', '🔎')}</td></tr>`;
         info.textContent = '';
         return;
     }
@@ -132,6 +132,7 @@ async function carregarLancamentos() {
                 }
                 await carregarLancamentos();
                 await carregarSaldos();
+                toast('Lançamento excluído.');
             });
         });
     });
@@ -206,6 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('fluxo-form').reset();
             await carregarLancamentos();
             await carregarSaldos();
+            toast('Lançamento salvo.');
         });
     });
 });

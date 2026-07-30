@@ -72,13 +72,13 @@
                                 <label id="label-data-inicio" for="it-data-inicio">Início (mês)</label>
                                 <input type="month" id="it-data-inicio" required>
                             </div>
-                            <div id="wrap-data-fim">
+                            <div class="campo-condicional" id="wrap-data-fim">
                                 <label for="it-data-fim">Fim (mês, opcional)</label>
                                 <input type="month" id="it-data-fim">
-                                <div class="msg" id="duracao-preview" style="margin-top:6px"></div>
+                                <div class="msg" id="duracao-preview" style="margin-top:6px" aria-live="polite"></div>
                             </div>
                         </div>
-                        <div class="row" id="wrap-rendimento" style="display:none">
+                        <div class="row campo-condicional oculto" id="wrap-rendimento">
                             <div>
                                 <label for="it-taxa">Rende? Taxa anual (ex: 1.09 = 9%/ano)</label>
                                 <input type="number" id="it-taxa" step="0.0001" placeholder="deixe em branco se não rende">
@@ -93,7 +93,7 @@
                             <input type="text" id="it-observacao">
                         </div>
                         <button type="submit">Adicionar item</button>
-                        <div id="item-msg" class="msg"></div>
+                        <div id="item-msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 

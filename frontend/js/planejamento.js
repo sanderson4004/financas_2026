@@ -5,8 +5,8 @@ let itensAtuais = [];
 function atualizarCamposItem() {
     const recorrencia = document.getElementById('it-recorrencia').value;
     document.getElementById('label-data-inicio').textContent = recorrencia === 'MENSAL' ? 'Início (mês)' : 'Data do evento (mês)';
-    document.getElementById('wrap-data-fim').style.display = recorrencia === 'MENSAL' ? 'block' : 'none';
-    document.getElementById('wrap-rendimento').style.display = recorrencia === 'UNICO' ? 'flex' : 'none';
+    document.getElementById('wrap-data-fim').classList.toggle('oculto', recorrencia !== 'MENSAL');
+    document.getElementById('wrap-rendimento').classList.toggle('oculto', recorrencia !== 'UNICO');
     atualizarDuracaoPreview();
 }
 
@@ -79,7 +79,7 @@ function renderGraficoProjecao(containerId, pontos) {
     const el = document.getElementById(containerId);
 
     if (pontos.length < 2) {
-        el.innerHTML = '<div class="empty-state">Ajuste o período da simulação (início/fim) pra ver o gráfico.</div>';
+        el.innerHTML = estadoVazioHTML('Ajuste o período da simulação (início/fim) pra ver o gráfico.', '📈');
         return;
     }
 
@@ -103,7 +103,7 @@ function renderGraficoProjecao(containerId, pontos) {
 
     el.innerHTML = `
         <div class="table-scroll">
-        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:640px; max-height:280px;">
+        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:280px;">
             <defs>
                 <linearGradient id="grad-projecao" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
@@ -160,7 +160,7 @@ async function carregarItens() {
     itensAtuais = data;
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Nenhum item cadastrado ainda.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8">${estadoVazioHTML('Nenhum item cadastrado ainda. Adicione o primeiro abaixo.', '🔭')}</td></tr>`;
         recalcular();
         return;
     }
@@ -180,6 +180,7 @@ async function carregarItens() {
                 }
                 await carregarItens();
                 recalcular();
+                toast('Item excluído.');
             });
         });
     });
@@ -248,6 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('item-form').reset();
             atualizarCamposItem();
             await carregarItens();
+            toast('Item adicionado.');
         });
     });
 });

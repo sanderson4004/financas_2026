@@ -55,23 +55,23 @@
                             <input type="number" id="proventos_recebidos" step="0.01" value="0">
                         </div>
                         <button type="submit">Salvar</button>
-                        <div id="msg" class="msg"></div>
+                        <div id="msg" class="msg" aria-live="polite"></div>
                     </form>
                 </div>
 
                 <div class="card">
                     <h2>Carteira de Bolsa</h2>
                     <div class="table-scroll">
-                        <table>
+                        <table class="tabela-bolsa">
                             <thead>
                                 <tr>
                                     <th>Ticker</th>
                                     <th>Nome</th>
-                                    <th>Tipo</th>
+                                    <th class="secundaria">Tipo</th>
                                     <th class="num">Qtd.</th>
                                     <th class="num">Valor mercado</th>
-                                    <th class="num">Valoriz. %</th>
-                                    <th class="num">Rentab. total %</th>
+                                    <th class="num secundaria">Valoriz. %</th>
+                                    <th class="num secundaria">Rentab. total %</th>
                                     <th class="num">% carteira</th>
                                     <th>Atualizar cotação / proventos</th>
                                 </tr>

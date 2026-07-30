@@ -16,10 +16,10 @@ async function carregarRendaFixa() {
             <td class="num">${formatMoney(r.valor_aplicado)}</td>
             <td class="num">${formatMoney(r.valor_bruto_atual)}</td>
             <td class="num">${formatMoney(r.valorizacao_reais)}</td>
-            <td class="num">${r.dias_ate_vencimento}</td>
-            <td class="num">${formatMoney(r.imposto_estimado)}</td>
-            <td class="num">${formatMoney(r.valor_liquido_estimado)}</td>
-            <td class="num">${r.valor_liquido_informado === null ? '—' : formatMoney(r.valor_liquido_informado)}</td>
+            <td class="num secundaria">${r.dias_ate_vencimento}</td>
+            <td class="num secundaria">${formatMoney(r.imposto_estimado)}</td>
+            <td class="num secundaria">${formatMoney(r.valor_liquido_estimado)}</td>
+            <td class="num secundaria">${r.valor_liquido_informado === null ? '—' : formatMoney(r.valor_liquido_informado)}</td>
             <td class="num">${(r.percentual_carteira * 100).toFixed(1)}%</td>
             <td>
                 <div class="inline-update">
@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             msg.className = 'msg success';
             document.getElementById('rf-form').reset();
             await carregarRendaFixa();
+            toast('Aplicação salva.');
         });
     });
 });

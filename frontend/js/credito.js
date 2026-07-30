@@ -98,7 +98,7 @@ function renderLinhaDetalhe(c, parcelas, aberta) {
                             <button type="submit" class="secondary">Aplicar</button>
                         </div>
                     </form>
-                    <div class="msg" id="parcelas-msg-${c.id}"></div>
+                    <div class="msg" id="parcelas-msg-${c.id}" aria-live="polite"></div>
                     <div class="table-scroll">
                         <table>
                             <thead>
@@ -145,7 +145,7 @@ async function carregarCompras() {
     }
 
     if (compras.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhuma compra encontrada.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="7">${estadoVazioHTML('Nenhuma compra encontrada. Lance a primeira acima.', '💳')}</td></tr>`;
         info.textContent = '';
         return;
     }
@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 await carregarCompras();
+                toast('Compra excluída.');
             });
         }
     });
@@ -268,6 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             await atualizarLinhaCompra(compraId, true, `Parcelas ${de} a ${ate} atualizadas para ${formatMoney(novoValor)}.`);
+            toast('Parcelas atualizadas.');
         });
     });
 
@@ -333,5 +335,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('credito-form').reset();
         document.getElementById('total_parcelas').value = 1;
         await carregarCompras();
+        toast(`Compra salva com ${totalParcelas} parcela(s).`);
     }
 });

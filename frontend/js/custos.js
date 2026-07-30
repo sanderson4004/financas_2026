@@ -43,7 +43,7 @@ async function carregarCustos(mesFoco) {
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Nenhuma categoria ANUAL/OUTRO_DELIMITADO vigente neste mês.</div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="9">${estadoVazioHTML('Nenhuma categoria ANUAL/OUTRO_DELIMITADO vigente neste mês.', '📐')}</td></tr>`;
         return;
     }
 
@@ -68,7 +68,7 @@ async function carregarDetalheCusto(categoriaCodigo) {
     }
 
     if (data.length === 0) {
-        alvo.innerHTML = '<div class="empty-state">Nenhum lançamento encontrado nesta janela.</div>';
+        alvo.innerHTML = estadoVazioHTML('Nenhum lançamento encontrado nesta janela.', '🔎');
         return;
     }
 

@@ -7,14 +7,14 @@ async function carregarResumo() {
     }
 
     document.getElementById('resumo').innerHTML = `
-        <div class="stat"><div class="label">Saldo atual</div><div class="value">${formatMoney(data.saldo_atual)}</div></div>
-        <div class="stat"><div class="label">Total aportado</div><div class="value">${formatMoney(data.total_aportado)}</div></div>
-        <div class="stat"><div class="label">Rendimento automático</div><div class="value">${formatMoney(data.rendimento_automatico_acumulado)}</div></div>
-        <div class="stat"><div class="label">Total resgatado</div><div class="value">${formatMoney(data.total_resgatado)}</div></div>
-        <div class="stat"><div class="label">Total bruto (app)</div><div class="value">${formatMoney(data.total_bruto_app)}</div></div>
-        <div class="stat"><div class="label">Total líquido (app)</div><div class="value">${formatMoney(data.total_liquido_app)}</div></div>
-        <div class="stat"><div class="label">Imposto real (bruto − líquido)</div><div class="value">${formatMoney(data.imposto_real)}</div></div>
-        <div class="stat"><div class="label">Desconto estimado (vs. ledger)</div><div class="value">${formatMoney(data.desconto_estimado)}</div></div>
+        <div class="stat" style="--tint: var(--accent)"><div class="label">Saldo atual</div><div class="value">${formatMoney(data.saldo_atual)}</div></div>
+        <div class="stat" style="--tint: var(--c6)"><div class="label">Total aportado</div><div class="value">${formatMoney(data.total_aportado)}</div></div>
+        <div class="stat" style="--tint: var(--ok)"><div class="label">Rendimento automático</div><div class="value">${formatMoney(data.rendimento_automatico_acumulado)}</div></div>
+        <div class="stat" style="--tint: var(--pending)"><div class="label">Total resgatado</div><div class="value">${formatMoney(data.total_resgatado)}</div></div>
+        <div class="stat" style="--tint: var(--c6)"><div class="label">Total bruto (app)</div><div class="value">${formatMoney(data.total_bruto_app)}</div></div>
+        <div class="stat" style="--tint: var(--accent-2)"><div class="label">Total líquido (app)</div><div class="value">${formatMoney(data.total_liquido_app)}</div></div>
+        <div class="stat" style="--tint: var(--bad)"><div class="label">Imposto real (bruto − líquido)</div><div class="value">${formatMoney(data.imposto_real)}</div></div>
+        <div class="stat" style="--tint: var(--pending)"><div class="label">Desconto estimado (vs. ledger)</div><div class="value">${formatMoney(data.desconto_estimado)}</div></div>
     `;
 
     document.getElementById('saldo_inicial').value = data.saldo_inicial ?? 0;
@@ -35,6 +35,11 @@ async function carregarExtrato() {
 
     if (error) {
         renderErroLinha(tbody, 5, error.message, carregarExtrato);
+        return;
+    }
+
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5">${estadoVazioHTML('Nenhuma movimentação ainda. Lance a primeira abaixo.', '🐷')}</td></tr>`;
         return;
     }
 
@@ -87,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             msg.textContent = 'Configuração salva.';
             msg.className = 'msg success';
             await carregarResumo();
+            toast('Configuração salva.');
         });
     });
 
@@ -118,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('mov-form').reset();
             await carregarResumo();
             await carregarExtrato();
+            toast('Movimentação lançada.');
         });
     });
 });

@@ -3,7 +3,7 @@ function renderDonut(containerId, segmentos) {
     const total = segmentos.reduce((s, seg) => s + seg.valor, 0);
 
     if (total <= 0) {
-        el.innerHTML = '<div class="empty-state">Sem patrimônio registrado ainda.</div>';
+        el.innerHTML = estadoVazioHTML('Sem patrimônio registrado ainda.', '🧮');
         return;
     }
 
@@ -47,12 +47,12 @@ function renderGraficoEvolucao(containerId, pontos) {
     const el = document.getElementById(containerId);
 
     if (pontos.length === 0) {
-        el.innerHTML = '<div class="empty-state">Ainda não há histórico suficiente — volte aqui em outro dia pra começar a ver a evolução.</div>';
+        el.innerHTML = estadoVazioHTML('Ainda não há histórico suficiente — volte aqui em outro dia pra começar a ver a evolução.', '📈');
         return;
     }
 
     if (pontos.length === 1) {
-        el.innerHTML = `<div class="empty-state">Só há 1 retrato até agora (${pontos[0].label}: ${formatMoney(pontos[0].valor)}). Volte em outro dia pra ver a evolução.</div>`;
+        el.innerHTML = estadoVazioHTML(`Só há 1 retrato até agora (${pontos[0].label}: ${formatMoney(pontos[0].valor)}). Volte em outro dia pra ver a evolução.`, '📈');
         return;
     }
 
@@ -74,7 +74,7 @@ function renderGraficoEvolucao(containerId, pontos) {
 
     el.innerHTML = `
         <div class="table-scroll">
-        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:560px; max-height:260px;">
+        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:260px;">
             <defs>
                 <linearGradient id="grad-evolucao" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
@@ -144,23 +144,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // Mesma cor pro KPI, pro ponto na tabela de detalhe e pro segmento do
+    // donut — as três formas de olhar pra mesma fonte de patrimônio devem
+    // "falar a mesma língua" visual. Cores repetem as dos ícones do menu
+    // lateral (Renda Fixa, Bolsa, Caixinha Turbo).
+    const CORES_FONTE = { 'Renda Fixa': '#ca8a04', 'Bolsa': '#fb923c', 'Caixinha Turbo': '#06b6d4' };
+
     document.getElementById('resumo').innerHTML = `
-        <div class="stat"><div class="label">Patrimônio total</div><div class="value">${formatMoney(data.patrimonio_total)}</div></div>
-        <div class="stat"><div class="label">Renda Fixa</div><div class="value">${formatMoney(data.total_renda_fixa)}</div></div>
-        <div class="stat"><div class="label">Bolsa</div><div class="value">${formatMoney(data.total_bolsa)}</div></div>
-        <div class="stat"><div class="label">Caixinha Turbo</div><div class="value">${formatMoney(data.total_caixinha_turbo)}</div></div>
+        <div class="stat" style="--tint: var(--accent)"><div class="label">Patrimônio total</div><div class="value">${formatMoney(data.patrimonio_total)}</div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Renda Fixa']}"><div class="label">Renda Fixa</div><div class="value">${formatMoney(data.total_renda_fixa)}</div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Bolsa']}"><div class="label">Bolsa</div><div class="value">${formatMoney(data.total_bolsa)}</div></div>
+        <div class="stat" style="--tint: ${CORES_FONTE['Caixinha Turbo']}"><div class="label">Caixinha Turbo</div><div class="value">${formatMoney(data.total_caixinha_turbo)}</div></div>
     `;
 
     document.getElementById('rows').innerHTML = `
-        <tr><td>Renda Fixa</td><td class="num">${formatMoney(data.total_renda_fixa)}</td><td class="num">${(data.pct_renda_fixa * 100).toFixed(1)}%</td></tr>
-        <tr><td>Bolsa</td><td class="num">${formatMoney(data.total_bolsa)}</td><td class="num">${(data.pct_bolsa * 100).toFixed(1)}%</td></tr>
-        <tr><td>Caixinha Turbo</td><td class="num">${formatMoney(data.total_caixinha_turbo)}</td><td class="num">${(data.pct_caixinha_turbo * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Renda Fixa']}"></span>Renda Fixa</td><td class="num">${formatMoney(data.total_renda_fixa)}</td><td class="num">${(data.pct_renda_fixa * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Bolsa']}"></span>Bolsa</td><td class="num">${formatMoney(data.total_bolsa)}</td><td class="num">${(data.pct_bolsa * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Caixinha Turbo']}"></span>Caixinha Turbo</td><td class="num">${formatMoney(data.total_caixinha_turbo)}</td><td class="num">${(data.pct_caixinha_turbo * 100).toFixed(1)}%</td></tr>
     `;
 
     renderDonut('donut-distribuicao', [
-        { label: 'Renda Fixa', valor: Number(data.total_renda_fixa), cor: '#ca8a04' },
-        { label: 'Bolsa', valor: Number(data.total_bolsa), cor: '#fb923c' },
-        { label: 'Caixinha Turbo', valor: Number(data.total_caixinha_turbo), cor: '#06b6d4' },
+        { label: 'Renda Fixa', valor: Number(data.total_renda_fixa), cor: CORES_FONTE['Renda Fixa'] },
+        { label: 'Bolsa', valor: Number(data.total_bolsa), cor: CORES_FONTE['Bolsa'] },
+        { label: 'Caixinha Turbo', valor: Number(data.total_caixinha_turbo), cor: CORES_FONTE['Caixinha Turbo'] },
     ]);
 
     const hoje = new Date().toISOString().slice(0, 10);
