@@ -12,75 +12,115 @@
         <div class="content">
             <header class="page-header">
                 <h1>Planejamento Futuro</h1>
-                <p>Cenários e simulações hipotéticas — não conecta com Fluxo/Crédito.</p>
+                <p>Projeção de saldo combinando itens complementares (não cenários alternativos) — receitas e despesas recorrentes, eventos únicos e valores que rendem ao longo do tempo.</p>
             </header>
 
             <main>
                 <div class="card">
-                    <h2>Novo item de simulação</h2>
-                    <p class="msg hint">O resultado é calculado aqui na hora, no navegador — nada é gravado como fórmula.</p>
-                    <form id="pf-form" class="stack">
+                    <h2>Parâmetros da simulação</h2>
+                    <form id="parametros-form" class="row" style="align-items:flex-end; flex-wrap:wrap">
                         <div>
-                            <label for="cenario">Cenário / grupo</label>
-                            <input type="text" id="cenario" required list="cenarios-existentes" placeholder="ex: CENÁRIO C — ...">
-                            <datalist id="cenarios-existentes"></datalist>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <label for="carater">Caráter</label>
-                                <select id="carater" required>
-                                    <option value="RECEITA">Receita</option>
-                                    <option value="DESPESA" selected>Despesa</option>
-                                    <option value="RESERVA">Reserva</option>
-                                    <option value="TOTAL">Total</option>
-                                    <option value="SALDO">Saldo</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="item">Item</label>
-                                <input type="text" id="item" required placeholder="ex: Dízimo, Reserva de emergência">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <label for="valor">Valor (R$)</label>
-                                <input type="number" id="valor" step="0.01" required>
-                            </div>
-                            <div>
-                                <label for="meses">Meses (só p/ simulação de rendimento)</label>
-                                <input type="number" id="meses" min="1">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div>
-                                <label for="rendimento_anual">Rendimento a.a. (ex: 1,09 = 9%)</label>
-                                <input type="number" id="rendimento_anual" step="0.0001">
-                            </div>
-                            <div>
-                                <label for="tipo_calculo">Tipo de cálculo</label>
-                                <select id="tipo_calculo">
-                                    <option value="">— sem simulação —</option>
-                                    <option value="Aporte Mensal Recorrente">Aporte Mensal Recorrente</option>
-                                    <option value="Valor Único">Valor Único</option>
-                                </select>
-                            </div>
+                            <label for="saldo-inicial">Saldo inicial (R$)</label>
+                            <input type="number" id="saldo-inicial" step="0.01" value="0" required>
                         </div>
                         <div>
-                            <label for="descricao">Observação</label>
-                            <input type="text" id="descricao">
+                            <label for="sim-inicio">Início da simulação</label>
+                            <input type="month" id="sim-inicio" required>
                         </div>
-                        <div class="stat" style="max-width:280px">
-                            <div class="label">Resultado calculado (prévia)</div>
-                            <div class="value" id="resultado-preview">—</div>
+                        <div>
+                            <label for="sim-fim">Fim da simulação</label>
+                            <input type="month" id="sim-fim" required>
                         </div>
-                        <button type="submit">Salvar</button>
-                        <div id="msg" class="msg"></div>
+                        <div>
+                            <button type="submit">Recalcular</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2>Itens já cadastrados</h2>
-                    <div id="grupos"></div>
+                    <h2>Novo item</h2>
+                    <p class="msg hint">Todos os itens são complementares: eles se somam na mesma projeção, não são cenários que se excluem.</p>
+                    <form id="item-form" class="stack">
+                        <div class="row">
+                            <div>
+                                <label for="it-nome">Nome</label>
+                                <input type="text" id="it-nome" required placeholder="ex: Pensão, Faculdade, Venda do imóvel">
+                            </div>
+                            <div>
+                                <label for="it-carater">Caráter</label>
+                                <select id="it-carater" required>
+                                    <option value="RECEITA">Receita</option>
+                                    <option value="DESPESA" selected>Despesa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label for="it-recorrencia">Recorrência</label>
+                                <select id="it-recorrencia" required>
+                                    <option value="MENSAL">Mensal (recorrente)</option>
+                                    <option value="UNICO">Evento único</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="it-valor">Valor (R$)</label>
+                                <input type="number" id="it-valor" step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label id="label-data-inicio" for="it-data-inicio">Início (mês)</label>
+                                <input type="month" id="it-data-inicio" required>
+                            </div>
+                            <div id="wrap-data-fim">
+                                <label for="it-data-fim">Fim (mês, opcional)</label>
+                                <input type="month" id="it-data-fim">
+                                <div class="msg" id="duracao-preview" style="margin-top:6px"></div>
+                            </div>
+                        </div>
+                        <div class="row" id="wrap-rendimento" style="display:none">
+                            <div>
+                                <label for="it-taxa">Rende? Taxa anual (ex: 1.09 = 9%/ano)</label>
+                                <input type="number" id="it-taxa" step="0.0001" placeholder="deixe em branco se não rende">
+                            </div>
+                            <div>
+                                <label for="it-meses-rendendo">Por quantos meses rende</label>
+                                <input type="number" id="it-meses-rendendo" min="1" placeholder="ex: 19">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="it-observacao">Observação (opcional)</label>
+                            <input type="text" id="it-observacao">
+                        </div>
+                        <button type="submit">Adicionar item</button>
+                        <div id="item-msg" class="msg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Itens cadastrados</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Caráter</th>
+                                    <th>Recorrência</th>
+                                    <th class="num">Valor</th>
+                                    <th>Início</th>
+                                    <th>Fim</th>
+                                    <th>Rendimento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Evolução do saldo projetado</h2>
+                    <div id="grafico-projecao"></div>
                 </div>
             </main>
         </div>

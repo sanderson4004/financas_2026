@@ -8,7 +8,15 @@ const NAV_ITEMS = [
     { href: 'bolsa.html', icon: '📈', label: 'Bolsa', color: '#fb923c' },
     { href: 'carteira.html', icon: '🧮', label: 'Carteira', color: '#64748b' },
     { href: 'planejamento.html', icon: '🔭', label: 'Planej. Futuro', color: '#14b8a6' },
-    { href: 'cadastros.html', icon: '🗂️', label: 'Cadastros', color: '#94a3b8' },
+    {
+        label: 'Cadastros', icon: '🗂️', color: '#94a3b8', group: true,
+        children: [
+            { href: 'cadastros.html#categorias', label: 'Categorias' },
+            { href: 'cadastros.html#vigencias', label: 'Vigências de meta' },
+            { href: 'cadastros.html#metodos', label: 'Métodos de pagamento' },
+            { href: 'cadastros.html#cartoes', label: 'Cartões' },
+        ],
+    },
 ];
 
 function renderSidebar() {
@@ -21,11 +29,25 @@ function renderSidebar() {
         <div class="brand"><span class="dot"></span> Finanças 2026</div>
         <div class="nav-label">Menu</div>
         <nav>
-            ${NAV_ITEMS.map(item => `
-                <a href="${item.href}" class="${item.href === atual ? 'active' : ''}">
-                    <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
-                </a>
-            `).join('')}
+            ${NAV_ITEMS.map((item, i) => {
+                if (item.group) {
+                    const abertoPorPadrao = atual === 'cadastros.html';
+                    return `
+                        <button type="button" class="nav-group-toggle ${abertoPorPadrao ? 'active' : ''}" data-group="${i}">
+                            <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
+                            <span class="chevron">›</span>
+                        </button>
+                        <div class="nav-sub" id="nav-sub-${i}" style="${abertoPorPadrao ? '' : 'display:none'}">
+                            ${item.children.map(sub => `<a href="${sub.href}">${sub.label}</a>`).join('')}
+                        </div>
+                    `;
+                }
+                return `
+                    <a href="${item.href}" class="${item.href === atual ? 'active' : ''}">
+                        <span class="icon" style="--tint: ${item.color}">${item.icon}</span> ${item.label}
+                    </a>
+                `;
+            }).join('')}
         </nav>
         <div class="sidebar-footer">
             <div class="user-chip"><span class="avatar">SA</span> Conta pessoal</div>
@@ -34,6 +56,15 @@ function renderSidebar() {
     `;
 
     document.getElementById('logout-btn').addEventListener('click', logout);
+
+    el.querySelectorAll('.nav-group-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sub = document.getElementById(`nav-sub-${btn.getAttribute('data-group')}`);
+            const abrindo = sub.style.display === 'none';
+            sub.style.display = abrindo ? 'flex' : 'none';
+            btn.classList.toggle('active', abrindo);
+        });
+    });
 }
 
 // Modal de confirmação reutilizável (substitui o confirm() nativo do navegador).
@@ -81,6 +112,13 @@ async function logout() {
     window.location.href = 'index.html';
 }
 
+function formatDate(iso) {
+    if (!iso) return '—';
+    const [ano, mes, dia] = String(iso).slice(0, 10).split('-');
+    if (!ano || !mes || !dia) return iso;
+    return `${dia}/${mes}/${ano}`;
+}
+
 function formatMoney(v) {
     if (v === null || v === undefined || v === '') return '—';
     return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -110,6 +148,26 @@ function caraterPill(carater) {
     if (!carater) return '';
     const cls = CARATER_CLASSES[carater] || 'carater-transferencia';
     return `<span class="pill ${cls}">${carater}</span>`;
+}
+
+// Pill contornado com a cor cadastrada pelo usuário (categoria/método),
+// texto sempre branco. Sem cor cadastrada, cai no visual neutro padrão.
+function pillCor(texto, cor) {
+    if (!texto) return '';
+    if (!cor) return `<span class="pill pill-cor-neutro">${texto}</span>`;
+    return `<span class="pill pill-cor" style="--cor: ${cor}">${texto}</span>`;
+}
+
+async function buscarMapaCoresCategorias() {
+    const { data, error } = await sb.from('categorias').select('codigo, cor');
+    if (error) return {};
+    return Object.fromEntries(data.map(c => [c.codigo, c.cor]));
+}
+
+async function buscarMapaCoresMetodos() {
+    const { data, error } = await sb.from('metodos_pagamento').select('nome, cor');
+    if (error) return {};
+    return Object.fromEntries(data.map(m => [m.nome, m.cor]));
 }
 
 const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];

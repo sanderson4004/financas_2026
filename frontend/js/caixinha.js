@@ -10,11 +10,14 @@ async function carregarResumo() {
         <div class="stat"><div class="label">Total aportado</div><div class="value">${formatMoney(data.total_aportado)}</div></div>
         <div class="stat"><div class="label">Rendimento automático</div><div class="value">${formatMoney(data.rendimento_automatico_acumulado)}</div></div>
         <div class="stat"><div class="label">Total resgatado</div><div class="value">${formatMoney(data.total_resgatado)}</div></div>
+        <div class="stat"><div class="label">Total bruto (app)</div><div class="value">${formatMoney(data.total_bruto_app)}</div></div>
         <div class="stat"><div class="label">Total líquido (app)</div><div class="value">${formatMoney(data.total_liquido_app)}</div></div>
-        <div class="stat"><div class="label">Desconto estimado</div><div class="value">${formatMoney(data.desconto_estimado)}</div></div>
+        <div class="stat"><div class="label">Imposto real (bruto − líquido)</div><div class="value">${formatMoney(data.imposto_real)}</div></div>
+        <div class="stat"><div class="label">Desconto estimado (vs. ledger)</div><div class="value">${formatMoney(data.desconto_estimado)}</div></div>
     `;
 
     document.getElementById('saldo_inicial').value = data.saldo_inicial ?? 0;
+    document.getElementById('total_bruto_app').value = data.total_bruto_app ?? '';
     document.getElementById('total_liquido_app').value = data.total_liquido_app ?? '';
 }
 
@@ -36,7 +39,7 @@ async function carregarExtrato() {
 
     tbody.innerHTML = data.map(r => `
         <tr>
-            <td>${r.data}</td>
+            <td>${formatDate(r.data)}</td>
             <td>${r.tipo_movimento}</td>
             <td>${r.origem_motivo}</td>
             <td class="num">${formatMoney(r.efeito_saldo)}</td>
@@ -62,6 +65,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const payload = {
             id: 1,
             saldo_inicial: parseFloat(document.getElementById('saldo_inicial').value),
+            total_bruto_app: document.getElementById('total_bruto_app').value
+                ? parseFloat(document.getElementById('total_bruto_app').value)
+                : null,
             total_liquido_app: document.getElementById('total_liquido_app').value
                 ? parseFloat(document.getElementById('total_liquido_app').value)
                 : null,

@@ -16,7 +16,7 @@
             </header>
 
             <main>
-                <div class="card">
+                <div class="card" id="categorias">
                     <h2>Nova categoria</h2>
                     <form id="categoria-form" class="stack">
                         <div class="row">
@@ -29,13 +29,19 @@
                                 <input type="text" id="cat-nome" required>
                             </div>
                         </div>
-                        <div>
-                            <label for="cat-carater">Caráter</label>
-                            <select id="cat-carater" required>
-                                <option value="RECEITA">Receita</option>
-                                <option value="DESPESA" selected>Despesa</option>
-                                <option value="RESERVA">Reserva</option>
-                            </select>
+                        <div class="row">
+                            <div>
+                                <label for="cat-carater">Caráter</label>
+                                <select id="cat-carater" required>
+                                    <option value="RECEITA">Receita</option>
+                                    <option value="DESPESA" selected>Despesa</option>
+                                    <option value="RESERVA">Reserva</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="cat-cor">Cor</label>
+                                <input type="color" id="cat-cor" value="#4f8ff7">
+                            </div>
                         </div>
                         <button type="submit">Cadastrar categoria</button>
                         <div id="categoria-msg" class="msg"></div>
@@ -51,7 +57,9 @@
                                     <th>Código</th>
                                     <th>Nome</th>
                                     <th>Caráter</th>
+                                    <th>Cor</th>
                                     <th>Status</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody id="cat-rows"></tbody>
@@ -59,7 +67,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" id="vigencias">
                     <h2>Nova vigência de meta</h2>
                     <p class="msg hint">É o que faz uma categoria aparecer no Painel de Metas ou em Custos Variáveis. Sem uma vigência ativa, a categoria existe mas não entra em nenhum painel.</p>
                     <form id="vigencia-form" class="stack">
@@ -128,7 +136,7 @@
                                     <th>Início</th>
                                     <th>Fim</th>
                                     <th>Status</th>
-                                    <th>Encerrar</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="vig-rows"></tbody>
@@ -136,13 +144,17 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" id="metodos">
                     <h2>Novo método de pagamento</h2>
                     <p class="msg hint">Usado no <em>Método</em> da aba Fluxo (Pix, Dinheiro, cartão de débito etc.).</p>
                     <form id="metodo-form" class="stack" style="max-width:360px">
                         <div>
                             <label for="met-nome">Nome</label>
                             <input type="text" id="met-nome" required placeholder="ex: CC - Bradesco">
+                        </div>
+                        <div>
+                            <label for="met-cor">Cor</label>
+                            <input type="color" id="met-cor" value="#22c55e">
                         </div>
                         <button type="submit">Cadastrar método</button>
                         <div id="met-msg" class="msg"></div>
@@ -156,6 +168,7 @@
                             <thead>
                                 <tr>
                                     <th>Nome</th>
+                                    <th>Cor</th>
                                     <th>Status</th>
                                     <th></th>
                                 </tr>
@@ -165,7 +178,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" id="cartoes">
                     <h2>Novo cartão</h2>
                     <p class="msg hint">Usado no <em>Cartão</em> da aba Crédito.</p>
                     <form id="cartao-form" class="stack" style="max-width:360px">

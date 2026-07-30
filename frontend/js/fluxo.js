@@ -1,21 +1,50 @@
+let coresMetodosCache = {};
+
+const LABEL_SALDO_METODO = {
+    'Pix': 'Saldo Nubank',
+    'Dinheiro': 'Saldo Dinheiro Carteira',
+};
+
+async function carregarSaldos() {
+    const el = document.getElementById('saldo-metodos');
+    const { data, error } = await sb.from('fluxo_saldo_por_metodo').select('*');
+
+    if (error) {
+        el.innerHTML = `<div class="msg error">Erro ao carregar saldos: ${error.message}</div>`;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        el.innerHTML = '<div class="empty-state">Nenhum lançamento ainda.</div>';
+        return;
+    }
+
+    el.innerHTML = data.map(s => `
+        <div class="stat">
+            <div class="label">${LABEL_SALDO_METODO[s.metodo] || s.metodo}</div>
+            <div class="value">${formatMoney(s.saldo)}</div>
+        </div>
+    `).join('');
+}
+
 async function carregarCategorias() {
-    const sel = document.getElementById('categoria');
+    const opcoes = await buscarCategoriasAtivas();
+    document.getElementById('categoria').innerHTML = opcoes;
+    document.getElementById('f-categoria').innerHTML = '<option value="">Todas</option>' + opcoes;
+}
+
+async function buscarCategoriasAtivas() {
     const { data, error } = await sb
         .from('categorias')
         .select('codigo, nome')
         .eq('status', 'ATIVA')
         .order('codigo');
 
-    if (error) {
-        sel.innerHTML = `<option>Erro ao carregar categorias</option>`;
-        return;
-    }
-
-    sel.innerHTML = data.map(c => `<option value="${c.codigo}">${c.codigo} — ${c.nome}</option>`).join('');
+    if (error) return `<option>Erro ao carregar categorias</option>`;
+    return data.map(c => `<option value="${c.codigo}">${c.codigo} — ${c.nome}</option>`).join('');
 }
 
 async function carregarMetodos() {
-    const sel = document.getElementById('metodo');
     const { data, error } = await sb
         .from('metodos_pagamento')
         .select('nome')
@@ -23,39 +52,67 @@ async function carregarMetodos() {
         .order('nome');
 
     if (error) {
-        sel.innerHTML = `<option>Erro ao carregar métodos</option>`;
+        document.getElementById('metodo').innerHTML = `<option>Erro ao carregar métodos</option>`;
         return;
     }
 
-    sel.innerHTML = data.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('');
+    const opcoes = data.map(m => `<option value="${m.nome}">${m.nome}</option>`).join('');
+    document.getElementById('metodo').innerHTML = opcoes;
+    document.getElementById('f-metodo').innerHTML = '<option value="">Todos</option>' + opcoes;
+}
+
+function lerFiltros() {
+    return {
+        busca: document.getElementById('f-busca').value.trim(),
+        carater: document.getElementById('f-carater').value,
+        categoria: document.getElementById('f-categoria').value,
+        metodo: document.getElementById('f-metodo').value,
+        dataDe: document.getElementById('f-data-de').value,
+        dataAte: document.getElementById('f-data-ate').value,
+    };
 }
 
 async function carregarLancamentos() {
     const tbody = document.getElementById('rows');
+    const info = document.getElementById('rows-info');
     tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
-    const { data, error } = await sb
-        .from('lancamentos_fluxo')
-        .select('*, categorias(nome)')
-        .order('id', { ascending: false })
-        .limit(30);
+    if (Object.keys(coresMetodosCache).length === 0) {
+        coresMetodosCache = await buscarMapaCoresMetodos();
+    }
+
+    const f = lerFiltros();
+    let query = sb.from('lancamentos_fluxo').select('*, categorias(nome, cor)').order('id', { ascending: false });
+
+    if (f.busca) query = query.ilike('descricao', `%${f.busca}%`);
+    if (f.carater) query = query.eq('carater', f.carater);
+    if (f.categoria) query = query.eq('categoria_codigo', f.categoria);
+    if (f.metodo) query = query.eq('metodo', f.metodo);
+    if (f.dataDe) query = query.gte('data_movimento', f.dataDe);
+    if (f.dataAte) query = query.lte('data_movimento', f.dataAte);
+
+    const { data, error } = await query;
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar: ${error.message}</td></tr>`;
+        info.textContent = '';
         return;
     }
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhum lançamento ainda.</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>';
+        info.textContent = '';
         return;
     }
 
+    info.textContent = `${data.length} lançamento(s) encontrado(s).`;
+
     tbody.innerHTML = data.map(r => `
         <tr>
-            <td>${r.data_movimento || r.data_pagamento || '—'}</td>
+            <td>${formatDate(r.data_movimento || r.data_pagamento)}</td>
             <td>${caraterPill(r.carater)}</td>
-            <td>${r.categorias ? r.categorias.nome : r.categoria_codigo}</td>
-            <td>${r.metodo}</td>
+            <td>${r.categorias ? pillCor(r.categorias.nome, r.categorias.cor) : r.categoria_codigo}</td>
+            <td>${pillCor(r.metodo, coresMetodosCache[r.metodo])}</td>
             <td>${r.descricao || ''}</td>
             <td class="num">${formatMoney(r.valor)}</td>
             <td><button type="button" class="danger" data-id="${r.id}">Excluir</button></td>
@@ -73,8 +130,22 @@ async function carregarLancamentos() {
                 return;
             }
             await carregarLancamentos();
+            await carregarSaldos();
         });
     });
+}
+
+function ajustarSinalValor(carater, valor) {
+    if (isNaN(valor)) return valor;
+    return carater === 'DESPESA' ? -Math.abs(valor) : Math.abs(valor);
+}
+
+function atualizarDicaValor() {
+    const carater = document.getElementById('carater').value;
+    const dica = document.getElementById('valor-dica');
+    dica.textContent = carater === 'DESPESA'
+        ? 'Despesas são sempre salvas como valor negativo — digite só o número, o sinal é automático.'
+        : 'Salvo como valor positivo — digite só o número, o sinal é automático.';
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -83,8 +154,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await carregarCategorias();
     await carregarMetodos();
+    await carregarSaldos();
     await carregarLancamentos();
     makeSortable('rows');
+
+    atualizarDicaValor();
+    document.getElementById('carater').addEventListener('change', atualizarDicaValor);
+
+    document.getElementById('filtro-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        carregarLancamentos();
+    });
+
+    document.getElementById('f-limpar').addEventListener('click', () => {
+        document.getElementById('filtro-form').reset();
+        carregarLancamentos();
+    });
 
     document.getElementById('fluxo-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -92,9 +177,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
+        const carater = document.getElementById('carater').value;
+
         const payload = {
-            carater: document.getElementById('carater').value,
-            valor: parseFloat(document.getElementById('valor').value),
+            carater,
+            valor: ajustarSinalValor(carater, parseFloat(document.getElementById('valor').value)),
             data_movimento: document.getElementById('data_movimento').value || null,
             data_pagamento: document.getElementById('data_pagamento').value || null,
             metodo: document.getElementById('metodo').value,
@@ -114,5 +201,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         msg.className = 'msg success';
         document.getElementById('fluxo-form').reset();
         await carregarLancamentos();
+        await carregarSaldos();
     });
 });
