@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!session) return;
 
     await carregarRendaFixa();
+    makeSortable('rows');
 
     document.getElementById('rf-form').addEventListener('submit', async (e) => {
         e.preventDefault();

@@ -35,11 +35,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hoje = new Date();
     popularSeletorMesAno('mes-sel', 'ano-sel', hoje.getFullYear() - 2, hoje.getFullYear() + 2);
-    definirSeletorMesAno('mes-sel', 'ano-sel', hoje.getMonth() + 1, hoje.getFullYear());
 
     const recarregar = () => carregarCustos(lerSeletorMesAnoComoData('mes-sel', 'ano-sel'));
+    ativarMesVigente('mes-sel', 'ano-sel', 'btn-mes-atual', recarregar);
     document.getElementById('mes-sel').addEventListener('change', recarregar);
     document.getElementById('ano-sel').addEventListener('change', recarregar);
+    makeSortable('rows');
 
     recarregar();
 });

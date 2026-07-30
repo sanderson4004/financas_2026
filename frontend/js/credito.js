@@ -14,15 +14,105 @@ async function carregarCategorias() {
     sel.innerHTML = data.map(c => `<option value="${c.codigo}">${c.codigo} — ${c.nome}</option>`).join('');
 }
 
+async function carregarCartoes() {
+    const sel = document.getElementById('cartao');
+    const { data, error } = await sb
+        .from('cartoes')
+        .select('nome')
+        .eq('status', 'ATIVA')
+        .order('nome');
+
+    if (error) {
+        sel.innerHTML = `<option>Erro ao carregar cartões</option>`;
+        return;
+    }
+
+    sel.innerHTML = data.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+}
+
 function somarMeses(dataISO, n) {
     const [ano, mes, dia] = dataISO.split('-').map(Number);
     const d = new Date(Date.UTC(ano, mes - 1 + n, dia));
     return d.toISOString().slice(0, 10);
 }
 
+function formatarValorParcelas(parcelas, valorFallback) {
+    if (!parcelas || parcelas.length === 0) return formatMoney(valorFallback);
+    const valores = new Set(parcelas.map(p => Number(p.valor_parcela)));
+    return valores.size <= 1 ? formatMoney(parcelas[0].valor_parcela) : 'valores variam';
+}
+
+function renderLinhaCompra(c, parcelas) {
+    const pagas = parcelas.filter(p => p.pago).length;
+    const valorTotal = parcelas.reduce((s, p) => s + Number(p.valor_parcela), 0);
+    return `
+        <tr id="compra-${c.id}">
+            <td>${c.descricao}</td>
+            <td>${c.cartao}</td>
+            <td>${c.categorias ? c.categorias.nome : (c.categoria_codigo || '—')}</td>
+            <td class="num">${c.total_parcelas}x ${formatarValorParcelas(parcelas, c.valor_parcela)}</td>
+            <td class="num">${formatMoney(valorTotal)}</td>
+            <td class="num">${pagas}/${parcelas.length || c.total_parcelas}</td>
+            <td>
+                <div class="inline-update">
+                    <button type="button" class="secondary" data-toggle-parcelas="${c.id}">Parcelas</button>
+                    <button type="button" class="danger" data-excluir-compra="${c.id}">Excluir</button>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function renderLinhaDetalhe(c, parcelas, aberta) {
+    return `
+        <tr class="parcelas-detail" id="detalhe-${c.id}" style="display:${aberta ? 'table-row' : 'none'}">
+            <td colspan="7">
+                <div class="parcelas-panel">
+                    <p class="msg hint">Reajuste de assinatura ou correção de valor? Informe o intervalo de parcelas e o novo valor — dá pra aplicar num trecho (ex: 9 até 12) ou em todas de uma vez (1 até ${c.total_parcelas}). Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
+                    <form class="row parcelas-range-form" data-compra-id="${c.id}">
+                        <div>
+                            <label>Da parcela nº</label>
+                            <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-de" required>
+                        </div>
+                        <div>
+                            <label>até a nº</label>
+                            <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-ate" required>
+                        </div>
+                        <div>
+                            <label>Novo valor (R$)</label>
+                            <input type="number" step="0.01" class="range-valor" required>
+                        </div>
+                        <div style="align-self:flex-end">
+                            <button type="submit" class="secondary">Aplicar</button>
+                        </div>
+                    </form>
+                    <div class="msg" id="parcelas-msg-${c.id}"></div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr><th>Nº</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th></tr>
+                            </thead>
+                            <tbody>
+                                ${parcelas.map(p => `
+                                    <tr>
+                                        <td>${p.numero_parcela}</td>
+                                        <td>${p.data_vencimento}</td>
+                                        <td class="num">${formatMoney(p.valor_parcela)}</td>
+                                        <td>${p.pago ? '<span class="pill status-ok">PAGA</span>' : '<span class="pill status-pending">EM ABERTO</span>'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
 async function carregarCompras() {
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
     const { data: compras, error } = await sb
         .from('compras_credito')
@@ -31,42 +121,47 @@ async function carregarCompras() {
         .limit(20);
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar: ${error.message}</td></tr>`;
         return;
     }
 
     if (compras.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">Nenhuma compra ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Nenhuma compra ainda.</div></td></tr>';
         return;
     }
 
     const ids = compras.map(c => c.id);
     const { data: parcelas } = await sb
         .from('parcelas_credito')
-        .select('compra_id, pago')
-        .in('compra_id', ids);
+        .select('id, compra_id, numero_parcela, data_vencimento, valor_parcela, pago')
+        .in('compra_id', ids)
+        .order('numero_parcela');
 
-    const contagem = {};
+    const porCompra = {};
     for (const p of (parcelas || [])) {
-        if (!contagem[p.compra_id]) contagem[p.compra_id] = { total: 0, pagas: 0 };
-        contagem[p.compra_id].total++;
-        if (p.pago) contagem[p.compra_id].pagas++;
+        if (!porCompra[p.compra_id]) porCompra[p.compra_id] = [];
+        porCompra[p.compra_id].push(p);
     }
 
-    tbody.innerHTML = compras.map(c => {
-        const cnt = contagem[c.id] || { total: c.total_parcelas, pagas: 0 };
-        const valorTotal = c.total_parcelas * c.valor_parcela;
-        return `
-            <tr>
-                <td>${c.descricao}</td>
-                <td>${c.cartao}</td>
-                <td>${c.categorias ? c.categorias.nome : c.categoria_codigo}</td>
-                <td class="num">${c.total_parcelas}x ${formatMoney(c.valor_parcela)}</td>
-                <td class="num">${formatMoney(valorTotal)}</td>
-                <td class="num">${cnt.pagas}/${cnt.total}</td>
-            </tr>
-        `;
-    }).join('');
+    tbody.innerHTML = compras.map(c => renderLinhaCompra(c, porCompra[c.id] || []) + renderLinhaDetalhe(c, porCompra[c.id] || [], false)).join('');
+}
+
+async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
+    const { data: c } = await sb.from('compras_credito').select('*, categorias(nome)').eq('id', compraId).single();
+    const { data: parcelas } = await sb
+        .from('parcelas_credito')
+        .select('id, compra_id, numero_parcela, data_vencimento, valor_parcela, pago')
+        .eq('compra_id', compraId)
+        .order('numero_parcela');
+
+    document.getElementById(`compra-${compraId}`).outerHTML = renderLinhaCompra(c, parcelas || []);
+    document.getElementById(`detalhe-${compraId}`).outerHTML = renderLinhaDetalhe(c, parcelas || [], manterAberta);
+
+    if (manterAberta && mensagemSucesso) {
+        const msg = document.getElementById(`parcelas-msg-${compraId}`);
+        msg.textContent = mensagemSucesso;
+        msg.className = 'msg success';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -74,7 +169,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!session) return;
 
     await carregarCategorias();
+    await carregarCartoes();
     await carregarCompras();
+    makeSortable('rows');
+
+    const tbody = document.getElementById('rows');
+
+    tbody.addEventListener('click', async (e) => {
+        const toggleBtn = e.target.closest('button[data-toggle-parcelas]');
+        if (toggleBtn) {
+            const linha = document.getElementById(`detalhe-${toggleBtn.getAttribute('data-toggle-parcelas')}`);
+            linha.style.display = linha.style.display === 'none' ? 'table-row' : 'none';
+            return;
+        }
+
+        const delBtn = e.target.closest('button[data-excluir-compra]');
+        if (delBtn) {
+            const id = delBtn.getAttribute('data-excluir-compra');
+            const ok = await confirmarAcao('Tem certeza que deseja excluir esta compra e todas as suas parcelas? Essa ação não pode ser desfeita.');
+            if (!ok) return;
+
+            const { error } = await sb.from('compras_credito').delete().eq('id', id);
+            if (error) {
+                alert(`Erro ao excluir: ${error.message}`);
+                return;
+            }
+            await carregarCompras();
+        }
+    });
+
+    tbody.addEventListener('submit', async (e) => {
+        const form = e.target.closest('form.parcelas-range-form');
+        if (!form) return;
+        e.preventDefault();
+
+        const compraId = form.getAttribute('data-compra-id');
+        const de = parseInt(form.querySelector('.range-de').value, 10);
+        const ate = parseInt(form.querySelector('.range-ate').value, 10);
+        const novoValor = parseFloat(form.querySelector('.range-valor').value);
+        const msg = document.getElementById(`parcelas-msg-${compraId}`);
+
+        if (!de || !ate || de > ate || isNaN(novoValor)) {
+            msg.textContent = 'Preencha um intervalo válido (nº inicial ≤ nº final) e o novo valor.';
+            msg.className = 'msg error';
+            return;
+        }
+
+        msg.textContent = 'Salvando...';
+        msg.className = 'msg';
+
+        const { error } = await sb
+            .from('parcelas_credito')
+            .update({ valor_parcela: novoValor })
+            .eq('compra_id', compraId)
+            .gte('numero_parcela', de)
+            .lte('numero_parcela', ate);
+
+        if (error) {
+            msg.textContent = `Erro: ${error.message}`;
+            msg.className = 'msg error';
+            return;
+        }
+
+        await atualizarLinhaCompra(compraId, true, `Parcelas ${de} a ${ate} atualizadas para ${formatMoney(novoValor)}.`);
+    });
 
     document.getElementById('credito-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -116,6 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data_vencimento: somarMeses(dataPrimeiroVencimento, n - 1),
                 pago: false,
                 categoria_codigo: compraPayload.categoria_codigo,
+                valor_parcela: valorParcela,
             });
         }
 

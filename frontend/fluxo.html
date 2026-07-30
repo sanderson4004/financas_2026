@@ -18,6 +18,7 @@
             <main>
                 <div class="card">
                     <h2>Novo lançamento</h2>
+                    <p class="msg hint">Método ou categoria novos? Cadastre em <a href="cadastros.html" style="color:inherit; text-decoration:underline">Cadastros</a> antes de lançar.</p>
                     <form id="fluxo-form" class="stack">
                         <div class="row">
                             <div>
@@ -46,13 +47,7 @@
                         <div class="row">
                             <div>
                                 <label for="metodo">Método</label>
-                                <select id="metodo" required>
-                                    <option value="Pix">Pix</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="CC – Nubank">CC – Nubank</option>
-                                    <option value="CC - Itaú">CC - Itaú</option>
-                                    <option value="CC - VISA MP">CC - VISA MP</option>
-                                </select>
+                                <select id="metodo" required></select>
                             </div>
                             <div>
                                 <label for="categoria">Categoria</label>
@@ -80,6 +75,7 @@
                                     <th>Método</th>
                                     <th>Descrição</th>
                                     <th class="num">Valor</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="rows"></tbody>

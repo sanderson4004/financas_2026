@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await carregarResumo();
     await carregarExtrato();
+    makeSortable('rows');
 
     document.getElementById('config-form').addEventListener('submit', async (e) => {
         e.preventDefault();

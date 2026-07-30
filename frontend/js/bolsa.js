@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!session) return;
 
     await carregarBolsa();
+    makeSortable('rows');
 
     document.getElementById('bolsa-form').addEventListener('submit', async (e) => {
         e.preventDefault();
