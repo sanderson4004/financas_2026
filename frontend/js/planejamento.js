@@ -98,12 +98,12 @@ function renderGraficoProjecao(containerId, pontos) {
     }));
 
     const yZero = h - padding - ((0 - min) / range) * (h - padding * 2);
-    const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+    const pathD = curvaSuave(coords);
     const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)} ${h - padding} L ${coords[0].x.toFixed(1)} ${h - padding} Z`;
 
     el.innerHTML = `
         <div class="table-scroll">
-        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:280px;">
+        <svg id="svg-projecao" viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:280px;">
             <defs>
                 <linearGradient id="grad-projecao" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
@@ -113,12 +113,16 @@ function renderGraficoProjecao(containerId, pontos) {
             <line x1="${padding}" y1="${yZero.toFixed(1)}" x2="${w - padding}" y2="${yZero.toFixed(1)}" stroke="var(--border)" stroke-dasharray="4 4"></line>
             <path d="${areaD}" fill="url(#grad-projecao)" stroke="none"></path>
             <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>
-            ${coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.5" fill="var(--accent)"><title>${c.label}: ${formatMoney(c.valor)}</title></circle>`).join('')}
+            ${coords.map((c, i) => `<line class="linha-guia" data-index="${i}" x1="${c.x.toFixed(1)}" y1="${padding}" x2="${c.x.toFixed(1)}" y2="${h - padding}"></line>`).join('')}
+            ${coords.map((c, i) => `<circle class="ponto-visivel" data-index="${i}" cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.5" fill="var(--accent)"></circle>`).join('')}
+            ${coords.map((c, i) => `<circle class="ponto-hit" data-index="${i}" cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="14"></circle>`).join('')}
             ${coords.map((c, i) => mostrarRotulo(i) ? `<text x="${c.x.toFixed(1)}" y="${h - 12}" font-size="10" fill="var(--text-faint)" text-anchor="middle">${c.label}</text>` : '').join('')}
         </svg>
         </div>
         <p class="msg" style="margin-top:8px">Saldo final projetado (${pontos[pontos.length - 1].label}): <strong style="color:var(--text)">${formatMoney(pontos[pontos.length - 1].valor)}</strong></p>
     `;
+
+    ligarInteracaoLinha('svg-projecao', coords, (c) => `<span class="rotulo">${c.label}</span><strong>${formatMoney(c.valor)}</strong>`);
 }
 
 function recalcular() {

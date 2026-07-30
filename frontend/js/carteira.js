@@ -9,38 +9,74 @@ function renderDonut(containerId, segmentos) {
 
     const r = 70, cx = 90, cy = 90, circunferencia = 2 * Math.PI * r;
     let acumulado = 0;
+    const visiveis = segmentos.filter(s => s.valor > 0);
 
-    const arcos = segmentos.filter(s => s.valor > 0).map(seg => {
+    const arcos = visiveis.map((seg, i) => {
         const fracao = seg.valor / total;
         const dash = fracao * circunferencia;
         const offset = -acumulado * circunferencia;
         acumulado += fracao;
-        return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.cor}" stroke-width="26"
+        return `<circle class="donut-arc" data-index="${i}" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.cor}" stroke-width="26"
                     stroke-dasharray="${dash.toFixed(1)} ${(circunferencia - dash).toFixed(1)}"
-                    stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})">
-                    <title>${seg.label}: ${formatMoney(seg.valor)} (${(fracao * 100).toFixed(1)}%)</title>
-                </circle>`;
+                    stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
     }).join('');
 
     el.innerHTML = `
         <div style="display:flex; align-items:center; gap:28px; flex-wrap:wrap">
             <svg width="180" height="180" viewBox="0 0 180 180">
                 ${arcos}
-                <text x="90" y="86" text-anchor="middle" font-size="12" fill="var(--text-faint)">Total</text>
-                <text x="90" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="var(--text)">${formatMoney(total)}</text>
+                <text id="donut-centro-rotulo" x="90" y="86" text-anchor="middle" font-size="12" fill="var(--text-faint)">Total</text>
+                <text id="donut-centro-valor" x="90" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text)" font-family="var(--font-mono)">${formatMoney(total)}</text>
             </svg>
-            <div style="display:flex; flex-direction:column; gap:10px">
-                ${segmentos.map(seg => `
-                    <div style="display:flex; align-items:center; gap:9px; font-size:13.5px;">
+            <div style="display:flex; flex-direction:column; gap:2px">
+                ${visiveis.map((seg, i) => `
+                    <div class="donut-legenda-item" data-index="${i}" style="display:flex; align-items:center; gap:9px; font-size:13.5px;">
                         <span style="width:11px;height:11px;border-radius:3px;background:${seg.cor};display:inline-block;flex-shrink:0;"></span>
                         <span style="color:var(--text-dim)">${seg.label}</span>
-                        <strong>${formatMoney(seg.valor)}</strong>
-                        <span style="color:var(--text-faint)">(${total > 0 ? ((seg.valor / total) * 100).toFixed(1) : '0.0'}%)</span>
+                        <strong style="font-family:var(--font-mono)">${formatMoney(seg.valor)}</strong>
+                        <span style="color:var(--text-faint)">(${((seg.valor / total) * 100).toFixed(1)}%)</span>
                     </div>
                 `).join('')}
             </div>
         </div>
     `;
+
+    const tooltip = criarTooltipGrafico();
+    const rotuloEl = document.getElementById('donut-centro-rotulo');
+    const valorEl = document.getElementById('donut-centro-valor');
+
+    const destacar = (i) => {
+        el.querySelectorAll('.donut-arc').forEach(arco => {
+            const ativo = Number(arco.getAttribute('data-index')) === i;
+            arco.classList.toggle('destacado', ativo);
+            arco.classList.toggle('apagado', !ativo);
+        });
+        el.querySelectorAll('.donut-legenda-item').forEach(item => {
+            item.classList.toggle('ativo', Number(item.getAttribute('data-index')) === i);
+        });
+        const seg = visiveis[i];
+        rotuloEl.textContent = seg.label;
+        valorEl.textContent = `${formatMoney(seg.valor)}`;
+    };
+
+    const limpar = () => {
+        el.querySelectorAll('.donut-arc').forEach(a => a.classList.remove('destacado', 'apagado'));
+        el.querySelectorAll('.donut-legenda-item').forEach(i => i.classList.remove('ativo'));
+        rotuloEl.textContent = 'Total';
+        valorEl.textContent = formatMoney(total);
+        tooltip.esconder();
+    };
+
+    el.querySelectorAll('.donut-arc, .donut-legenda-item').forEach(elemento => {
+        const i = Number(elemento.getAttribute('data-index'));
+        const seg = visiveis[i];
+        elemento.addEventListener('mouseenter', (e) => {
+            destacar(i);
+            tooltip.mostrar(`<span class="rotulo">${seg.label}</span><strong>${formatMoney(seg.valor)}</strong> (${((seg.valor / total) * 100).toFixed(1)}%)`, e);
+        });
+        elemento.addEventListener('mousemove', (e) => tooltip.mover(e));
+        elemento.addEventListener('mouseleave', limpar);
+    });
 }
 
 function renderGraficoEvolucao(containerId, pontos) {
@@ -69,12 +105,12 @@ function renderGraficoEvolucao(containerId, pontos) {
         ...p,
     }));
 
-    const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+    const pathD = curvaSuave(coords);
     const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)} ${h - padding} L ${coords[0].x.toFixed(1)} ${h - padding} Z`;
 
     el.innerHTML = `
         <div class="table-scroll">
-        <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:260px;">
+        <svg id="svg-evolucao" viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:320px; max-height:260px;">
             <defs>
                 <linearGradient id="grad-evolucao" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
@@ -83,11 +119,17 @@ function renderGraficoEvolucao(containerId, pontos) {
             </defs>
             <path d="${areaD}" fill="url(#grad-evolucao)" stroke="none"></path>
             <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>
-            ${coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4" fill="var(--accent)"><title>${c.label}: ${formatMoney(c.valor)}</title></circle>`).join('')}
+            ${coords.map(c => `<line class="linha-guia" data-index="${coords.indexOf(c)}" x1="${c.x.toFixed(1)}" y1="${padding * 0.3}" x2="${c.x.toFixed(1)}" y2="${h - padding}"></line>`).join('')}
+            ${coords.map((c, i) => `
+                <circle class="ponto-visivel" data-index="${i}" cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3.5" fill="var(--accent)"></circle>
+                <circle class="ponto-hit" data-index="${i}" cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="14"></circle>
+            `).join('')}
             ${coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 10}" font-size="10" fill="var(--text-faint)" text-anchor="middle">${c.label}</text>`).join('')}
         </svg>
         </div>
     `;
+
+    ligarInteracaoLinha('svg-evolucao', coords, (c) => `<span class="rotulo">${c.label}</span><strong>${formatMoney(c.valor)}</strong>`);
 }
 
 function inicioDaSemana(dataISO) {

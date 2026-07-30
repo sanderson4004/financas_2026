@@ -278,6 +278,86 @@ function vigiarContrasteCor(inputId, avisoId) {
     checar();
 }
 
+// -----------------------------------------------------------------------
+// Tooltip flutuante reutilizável pra gráficos SVG — aparece na hora
+// (o <title> nativo do navegador demora ~1s e não pode ser estilizado).
+// -----------------------------------------------------------------------
+function criarTooltipGrafico() {
+    let el = document.getElementById('grafico-tooltip');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'grafico-tooltip';
+        el.className = 'grafico-tooltip';
+        document.body.appendChild(el);
+    }
+    return {
+        mostrar(html, evento) {
+            el.innerHTML = html;
+            el.style.left = `${evento.clientX}px`;
+            el.style.top = `${evento.clientY}px`;
+            el.classList.add('visivel');
+        },
+        mover(evento) {
+            el.style.left = `${evento.clientX}px`;
+            el.style.top = `${evento.clientY}px`;
+        },
+        esconder() {
+            el.classList.remove('visivel');
+        },
+    };
+}
+
+// Curva suave (Catmull-Rom convertida em Bézier cúbica) passando por todos
+// os pontos — bem mais elegante que segmentos de reta ligando ponto a
+// ponto, sem perder nenhum valor real no caminho.
+function curvaSuave(coords) {
+    if (coords.length < 3) {
+        return coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+    }
+    let d = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+        const p0 = coords[i - 1] || coords[i];
+        const p1 = coords[i];
+        const p2 = coords[i + 1];
+        const p3 = coords[i + 2] || p2;
+        const cp1x = p1.x + (p2.x - p0.x) / 6;
+        const cp1y = p1.y + (p2.y - p0.y) / 6;
+        const cp2x = p2.x - (p3.x - p1.x) / 6;
+        const cp2y = p2.y - (p3.y - p1.y) / 6;
+        d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+    return d;
+}
+
+// Interatividade compartilhada entre os gráficos de linha (evolução da
+// Carteira, projeção do Planejamento): tooltip + destaque do ponto mais
+// próximo + linha-guia vertical.
+function ligarInteracaoLinha(svgId, coords, formatarTooltip) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    const tooltip = criarTooltipGrafico();
+
+    const destacar = (i) => {
+        svg.querySelectorAll('.ponto-visivel').forEach(p => p.classList.toggle('ativo', Number(p.getAttribute('data-index')) === i));
+        svg.querySelectorAll('.linha-guia').forEach(l => l.classList.toggle('ativa', Number(l.getAttribute('data-index')) === i));
+    };
+    const limpar = () => {
+        svg.querySelectorAll('.ponto-visivel').forEach(p => p.classList.remove('ativo'));
+        svg.querySelectorAll('.linha-guia').forEach(l => l.classList.remove('ativa'));
+        tooltip.esconder();
+    };
+
+    svg.querySelectorAll('.ponto-hit').forEach(hit => {
+        const i = Number(hit.getAttribute('data-index'));
+        hit.addEventListener('mouseenter', (e) => {
+            destacar(i);
+            tooltip.mostrar(formatarTooltip(coords[i]), e);
+        });
+        hit.addEventListener('mousemove', (e) => tooltip.mover(e));
+        hit.addEventListener('mouseleave', limpar);
+    });
+}
+
 async function requireAuth() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {

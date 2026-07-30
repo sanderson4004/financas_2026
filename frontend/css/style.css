@@ -5,8 +5,8 @@
 @font-face { font-family: 'Bricolage'; src: url('../fonts/BricolageGrotesque-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'Instrument'; src: url('../fonts/InstrumentSans-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Instrument'; src: url('../fonts/InstrumentSans-Bold.ttf') format('truetype'); font-weight: 650; font-display: swap; }
-@font-face { font-family: 'RedHatMono'; src: url('../fonts/RedHatMono-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'RedHatMono'; src: url('../fonts/RedHatMono-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'GeistMono'; src: url('../fonts/GeistMono-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'GeistMono'; src: url('../fonts/GeistMono-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 
 /* =========================================================================
    TOKENS — tema escuro (padrão) e tema claro. Troca via [data-theme] na
@@ -66,7 +66,7 @@
 
     --font-display: 'Bricolage', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-body: 'Instrument', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-mono: 'RedHatMono', ui-monospace, "SF Mono", Consolas, monospace;
+    --font-mono: 'GeistMono', ui-monospace, "SF Mono", Consolas, monospace;
 }
 
 :root[data-theme="claro"] {
@@ -175,7 +175,7 @@ body::after {
 
 h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.015em; }
 
-::selection { background: var(--accent-glow); color: #fff; }
+::selection { background: var(--accent-glow); color: var(--text); }
 
 /* Scrollbar (webkit) */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -194,7 +194,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
 .sidebar {
     width: var(--sidebar-w);
     flex: 0 0 var(--sidebar-w);
-    background: linear-gradient(180deg, var(--bg-elevated) 0%, #0a0a0e 100%);
+    background: var(--panel);
     border-right: 1px solid var(--border-soft);
     display: flex;
     flex-direction: column;
@@ -543,7 +543,11 @@ main .card:nth-of-type(6n+6) h2::before { background: var(--c6); box-shadow: 0 0
 
 .card h2:not(:first-child) { margin-top: 6px; }
 
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+/* Sem width:100% de propósito — com poucas colunas/conteúdo curto, forçar
+   100% faz o navegador espalhar o espaço sobrando de forma desigual entre
+   colunas (vãos feios). A tabela ocupa só o que o conteúdo pede; o
+   .table-scroll continua como reforço só pras tabelas realmente largas. */
+table { width: auto; border-collapse: collapse; font-size: 13.5px; }
 
 th, td {
     text-align: left;
@@ -632,6 +636,15 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
     background: var(--bg-elevated);
 }
 
+/* Quando a última coluna é um mini-formulário largo (edição inline de
+   cotação/proventos, valor bruto/líquido), fixá-la sobrepõe a coluna
+   anterior de forma ilegível — melhor deixá-la rolar normalmente. */
+.table-scroll.sem-coluna-fixa table > thead > tr > :last-child,
+.table-scroll.sem-coluna-fixa table > tbody > tr > :last-child {
+    position: static;
+    box-shadow: none;
+}
+
 .pill {
     display: inline-flex;
     align-items: center;
@@ -682,8 +695,33 @@ input[type="color"] {
 }
 
 form.stack { display: flex; flex-direction: column; gap: 15px; max-width: 520px; }
-form .row { display: flex; gap: 12px; flex-wrap: wrap; }
-form .row > * { flex: 1; min-width: 160px; }
+/* ".row" pode ser um <div> dentro do form OU o próprio <form> ter a classe
+   — os dois casos precisam do mesmo layout (o seletor só com espaço
+   "form .row" não pega o segundo caso, form.row). */
+form.row, form .row { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Rótulos de tamanhos diferentes (um quebra em 2 linhas, outro não) não
+   podem empurrar o campo abaixo pra alturas diferentes — cada item vira
+   uma coluna com o conteúdo "grudado" embaixo, então os campos sempre
+   alinham na mesma linha independente do rótulo. */
+form.row > *, form .row > * { flex: 1; min-width: 160px; display: flex; flex-direction: column; justify-content: flex-end; }
+
+/* Barra de filtros (Fluxo, Crédito): muitos campos pequenos — um grid se
+   organiza melhor que flex-wrap, que faz cada campo "sobrando" virar uma
+   linha inteira sozinho (feio e desperdiça espaço). */
+.form-filtros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+.form-filtros .busca { grid-column: span 2; min-width: 220px; }
+.form-filtros .acoes { display: flex; gap: 10px; grid-column: span 2; }
+.form-filtros .acoes > * { flex: 1; }
+
+@media (max-width: 560px) {
+    .form-filtros .busca { grid-column: 1 / -1; }
+    .form-filtros .acoes { grid-column: 1 / -1; }
+}
 
 label {
     font-size: 12.5px;
@@ -834,7 +872,8 @@ input[type="color"]:focus-visible {
 .msg.hint { background: var(--accent-soft); color: var(--accent); padding: 11px 13px; border-radius: var(--radius-sm); margin-bottom: 4px; border: 1px solid rgba(79, 143, 247, 0.2); }
 
 .inline-update { display: flex; gap: 6px; align-items: center; }
-.inline-update input { max-width: 100px; }
+.inline-update input { width: 72px; max-width: 72px; }
+.inline-update button { white-space: nowrap; padding-left: 12px; padding-right: 12px; }
 
 /* ---------------------------------------------------------------------
    Campos condicionais (aparecem/somem conforme outra escolha do form) —
@@ -1008,6 +1047,47 @@ input[type="color"]:focus-visible {
 
 @media (max-width: 520px) {
     #toast-stack { left: 16px; right: 16px; max-width: none; }
+}
+
+/* ---------------------------------------------------------------------
+   Gráficos SVG interativos (donut, evolução, projeção): tooltip
+   flutuante + destaque de ponto/segmento ao passar o mouse.
+--------------------------------------------------------------------- */
+.grafico-tooltip {
+    position: fixed;
+    z-index: 3000;
+    pointer-events: none;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    padding: 8px 13px;
+    font-size: 12.5px;
+    color: var(--text);
+    transform: translate(-50%, -130%);
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    white-space: nowrap;
+}
+.grafico-tooltip.visivel { opacity: 1; }
+.grafico-tooltip strong { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.grafico-tooltip .rotulo { color: var(--text-dim); margin-right: 6px; }
+
+.ponto-hit { fill: transparent; cursor: pointer; }
+.ponto-visivel { transition: r 0.12s ease; }
+.ponto-hit:hover + .ponto-visivel,
+.ponto-visivel.ativo { r: 6; }
+.linha-guia { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; transition: opacity 0.12s ease; pointer-events: none; }
+.linha-guia.ativa { opacity: 1; }
+
+.donut-arc { cursor: pointer; transition: stroke-width 0.15s ease, opacity 0.15s ease; }
+.donut-arc.destacado { stroke-width: 30; }
+.donut-arc.apagado { opacity: 0.35; }
+.donut-legenda-item { cursor: pointer; border-radius: var(--radius-sm); padding: 4px 6px; margin: -4px -6px; transition: background 0.12s ease; }
+.donut-legenda-item:hover, .donut-legenda-item.ativo { background: var(--panel-hover); }
+
+@media (prefers-reduced-motion: reduce) {
+    .ponto-visivel, .linha-guia, .donut-arc, .donut-legenda-item { transition: none; }
 }
 
 .empty-state {
