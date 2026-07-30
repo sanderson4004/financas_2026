@@ -19,7 +19,7 @@ function renderLinhaCusto(r) {
         <tr class="custo-detalhe" id="detalhe-custo-${r.categoria_codigo}" style="display:none">
             <td colspan="9">
                 <div class="parcelas-panel" id="detalhe-conteudo-${r.categoria_codigo}">
-                    <div class="empty-state">Carregando lançamentos...</div>
+                    ${carregandoHTML('Carregando lançamentos...')}
                 </div>
             </td>
         </tr>
@@ -29,7 +29,7 @@ function renderLinhaCusto(r) {
 async function carregarCustos(mesFoco) {
     mesFocoAtual = mesFoco;
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="9">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(9);
 
     const [{ data, error }, coresCategorias] = await Promise.all([
         sb.rpc('custos_variaveis', { mes_foco: mesFoco }),
@@ -38,7 +38,7 @@ async function carregarCustos(mesFoco) {
     coresCategoriasAtual = coresCategorias;
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="9">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 9, error.message, () => carregarCustos(mesFoco));
         return;
     }
 
@@ -63,7 +63,7 @@ async function carregarDetalheCusto(categoriaCodigo) {
     });
 
     if (error) {
-        alvo.innerHTML = `<div class="msg error">Erro ao carregar lançamentos: ${error.message}</div>`;
+        renderErro(alvo, error.message, () => carregarDetalheCusto(categoriaCodigo));
         return;
     }
 

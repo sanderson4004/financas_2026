@@ -1,11 +1,11 @@
 async function carregarBolsa() {
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="9">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(9);
 
     const { data, error } = await sb.from('bolsa_detalhe').select('*').order('id');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="9">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 9, error.message, carregarBolsa);
         return;
     }
 
@@ -32,16 +32,18 @@ async function carregarBolsa() {
     tbody.querySelectorAll('button[data-id]').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.getAttribute('data-id');
-            const cotacao = parseFloat(document.getElementById(`cot-${id}`).value);
-            const proventos = parseFloat(document.getElementById(`prov-${id}`).value);
-            const { error } = await sb.from('investimentos_bolsa')
-                .update({ cotacao_atual: cotacao, proventos_recebidos: proventos, atualizado_em: new Date().toISOString() })
-                .eq('id', id);
-            if (error) {
-                alert(`Erro ao atualizar: ${error.message}`);
-                return;
-            }
-            await carregarBolsa();
+            await comBotaoOcupado(btn, async () => {
+                const cotacao = parseFloat(document.getElementById(`cot-${id}`).value);
+                const proventos = parseFloat(document.getElementById(`prov-${id}`).value);
+                const { error } = await sb.from('investimentos_bolsa')
+                    .update({ cotacao_atual: cotacao, proventos_recebidos: proventos, atualizado_em: new Date().toISOString() })
+                    .eq('id', id);
+                if (error) {
+                    alert(`Erro ao atualizar: ${error.message}`);
+                    return;
+                }
+                await carregarBolsa();
+            });
         });
     });
 }
@@ -56,30 +58,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('bolsa-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const payload = {
-            ticker: document.getElementById('ticker').value.trim().toUpperCase(),
-            nome_ativo: document.getElementById('nome_ativo').value,
-            tipo: document.getElementById('tipo').value,
-            quantidade: parseFloat(document.getElementById('quantidade').value),
-            preco_medio: parseFloat(document.getElementById('preco_medio').value),
-            cotacao_atual: parseFloat(document.getElementById('cotacao_atual').value),
-            proventos_recebidos: parseFloat(document.getElementById('proventos_recebidos').value || '0'),
-        };
+        await comBotaoOcupado(btn, async () => {
+            const payload = {
+                ticker: document.getElementById('ticker').value.trim().toUpperCase(),
+                nome_ativo: document.getElementById('nome_ativo').value,
+                tipo: document.getElementById('tipo').value,
+                quantidade: parseFloat(document.getElementById('quantidade').value),
+                preco_medio: parseFloat(document.getElementById('preco_medio').value),
+                cotacao_atual: parseFloat(document.getElementById('cotacao_atual').value),
+                proventos_recebidos: parseFloat(document.getElementById('proventos_recebidos').value || '0'),
+            };
 
-        const { error } = await sb.from('investimentos_bolsa').insert(payload);
+            const { error } = await sb.from('investimentos_bolsa').insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Ativo salvo.';
-        msg.className = 'msg success';
-        document.getElementById('bolsa-form').reset();
-        await carregarBolsa();
+            msg.textContent = 'Ativo salvo.';
+            msg.className = 'msg success';
+            document.getElementById('bolsa-form').reset();
+            await carregarBolsa();
+        });
     });
 });

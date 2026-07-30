@@ -148,12 +148,12 @@ function renderLinhaItem(item) {
 
 async function carregarItens() {
     const tbody = document.getElementById('rows');
-    tbody.innerHTML = '<tr><td colspan="8">Carregando...</td></tr>';
+    tbody.innerHTML = carregandoLinhaHTML(8);
 
     const { data, error } = await sb.from('planejamento_itens').select('*').order('data_inicio');
 
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="8">Erro ao carregar: ${error.message}</td></tr>`;
+        renderErroLinha(tbody, 8, error.message, carregarItens);
         return;
     }
 
@@ -172,13 +172,15 @@ async function carregarItens() {
             const ok = await confirmarAcao('Tem certeza que deseja excluir este item da projeção?');
             if (!ok) return;
 
-            const { error: errDel } = await sb.from('planejamento_itens').delete().eq('id', btn.getAttribute('data-id'));
-            if (errDel) {
-                alert(`Erro ao excluir: ${errDel.message}`);
-                return;
-            }
-            await carregarItens();
-            recalcular();
+            await comBotaoOcupado(btn, async () => {
+                const { error: errDel } = await sb.from('planejamento_itens').delete().eq('id', btn.getAttribute('data-id'));
+                if (errDel) {
+                    alert(`Erro ao excluir: ${errDel.message}`);
+                    return;
+                }
+                await carregarItens();
+                recalcular();
+            });
         });
     });
 
@@ -210,39 +212,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('item-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = document.getElementById('item-msg');
+        const btn = e.target.querySelector('button[type="submit"]');
         msg.textContent = 'Salvando...';
         msg.className = 'msg';
 
-        const recorrencia = document.getElementById('it-recorrencia').value;
-        const taxaRaw = document.getElementById('it-taxa').value;
-        const mesesRaw = document.getElementById('it-meses-rendendo').value;
+        await comBotaoOcupado(btn, async () => {
+            const recorrencia = document.getElementById('it-recorrencia').value;
+            const taxaRaw = document.getElementById('it-taxa').value;
+            const mesesRaw = document.getElementById('it-meses-rendendo').value;
 
-        const payload = {
-            nome: document.getElementById('it-nome').value.trim(),
-            carater: document.getElementById('it-carater').value,
-            recorrencia,
-            valor: parseFloat(document.getElementById('it-valor').value),
-            data_inicio: `${document.getElementById('it-data-inicio').value}-01`,
-            data_fim: (recorrencia === 'MENSAL' && document.getElementById('it-data-fim').value)
-                ? `${document.getElementById('it-data-fim').value}-01`
-                : null,
-            taxa_rendimento_anual: (recorrencia === 'UNICO' && taxaRaw) ? parseFloat(taxaRaw) : null,
-            meses_rendendo: (recorrencia === 'UNICO' && mesesRaw) ? parseInt(mesesRaw, 10) : null,
-            observacao: document.getElementById('it-observacao').value || null,
-        };
+            const payload = {
+                nome: document.getElementById('it-nome').value.trim(),
+                carater: document.getElementById('it-carater').value,
+                recorrencia,
+                valor: parseFloat(document.getElementById('it-valor').value),
+                data_inicio: `${document.getElementById('it-data-inicio').value}-01`,
+                data_fim: (recorrencia === 'MENSAL' && document.getElementById('it-data-fim').value)
+                    ? `${document.getElementById('it-data-fim').value}-01`
+                    : null,
+                taxa_rendimento_anual: (recorrencia === 'UNICO' && taxaRaw) ? parseFloat(taxaRaw) : null,
+                meses_rendendo: (recorrencia === 'UNICO' && mesesRaw) ? parseInt(mesesRaw, 10) : null,
+                observacao: document.getElementById('it-observacao').value || null,
+            };
 
-        const { error } = await sb.from('planejamento_itens').insert(payload);
+            const { error } = await sb.from('planejamento_itens').insert(payload);
 
-        if (error) {
-            msg.textContent = `Erro: ${error.message}`;
-            msg.className = 'msg error';
-            return;
-        }
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
 
-        msg.textContent = 'Item adicionado.';
-        msg.className = 'msg success';
-        document.getElementById('item-form').reset();
-        atualizarCamposItem();
-        await carregarItens();
+            msg.textContent = 'Item adicionado.';
+            msg.className = 'msg success';
+            document.getElementById('item-form').reset();
+            atualizarCamposItem();
+            await carregarItens();
+        });
     });
 });
