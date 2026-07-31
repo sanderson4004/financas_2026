@@ -10,18 +10,11 @@ function renderLinhaCusto(r) {
             <td>${pillCor(r.categoria_nome, coresCategoriasAtual[r.categoria_codigo])}</td>
             <td>${r.tipo_teto}</td>
             <td class="num">${formatMoney(r.teto)}</td>
-            <td class="num"><button type="button" class="link-realizado" data-categoria="${r.categoria_codigo}">${formatMoney(r.realizado)}</button></td>
+            <td class="num"><button type="button" class="link-realizado" data-categoria="${r.categoria_codigo}">${formatMoney(r.realizado)}<span class="seta">▸</span></button></td>
             <td class="num">${formatMoney(r.saldo)}</td>
             <td class="num">${r.percentual_usado === null ? '—' : (r.percentual_usado * 100).toFixed(1) + '%'}</td>
             <td>${r.referencia}</td>
             <td>${statusPill(r.status)}</td>
-        </tr>
-        <tr class="custo-detalhe" id="detalhe-custo-${r.categoria_codigo}" style="display:none">
-            <td colspan="9">
-                <div class="parcelas-panel" id="detalhe-conteudo-${r.categoria_codigo}">
-                    ${carregandoHTML('Carregando lançamentos...')}
-                </div>
-            </td>
         </tr>
     `;
 }
@@ -30,6 +23,8 @@ async function carregarCustos(mesFoco) {
     mesFocoAtual = mesFoco;
     const tbody = document.getElementById('rows');
     tbody.innerHTML = carregandoLinhaHTML(9);
+    categoriaAberta = null;
+    document.getElementById('custo-detalhe-container').innerHTML = '';
 
     const [{ data, error }, coresCategorias] = await Promise.all([
         sb.rpc('custos_variaveis', { mes_foco: mesFoco }),
@@ -50,8 +45,13 @@ async function carregarCustos(mesFoco) {
     tbody.innerHTML = data.map(renderLinhaCusto).join('');
 }
 
+// O painel de detalhe abre FORA da <table> de categorias (num container
+// próprio, logo abaixo dela) — ver comentário equivalente em credito.js.
+let categoriaAberta = null;
+
 async function carregarDetalheCusto(categoriaCodigo) {
-    const alvo = document.getElementById(`detalhe-conteudo-${categoriaCodigo}`);
+    const alvo = document.getElementById('custo-detalhe-container');
+    alvo.innerHTML = carregandoHTML('Carregando lançamentos...');
 
     if (Object.keys(coresMetodosAtual).length === 0) {
         coresMetodosAtual = await buscarMapaCoresMetodos();
@@ -112,13 +112,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!btn) return;
 
         const categoria = btn.getAttribute('data-categoria');
-        const linha = document.getElementById(`detalhe-custo-${categoria}`);
-        const abrindo = linha.style.display === 'none';
-        linha.style.display = abrindo ? 'table-row' : 'none';
+        const container = document.getElementById('custo-detalhe-container');
 
-        if (abrindo) {
-            await carregarDetalheCusto(categoria);
+        document.querySelectorAll('button.link-realizado.aberto').forEach(b => b.classList.remove('aberto'));
+
+        if (categoriaAberta === categoria) {
+            categoriaAberta = null;
+            container.innerHTML = '';
+            return;
         }
+
+        categoriaAberta = categoria;
+        btn.classList.add('aberto');
+        await carregarDetalheCusto(categoria);
     });
 
     recarregar();
