@@ -1,10 +1,10 @@
 /* ---------------------------------------------------------------------
    Fontes — auto-hospedadas (sem CDN externo), licença OFL em fonts/.
 --------------------------------------------------------------------- */
-@font-face { font-family: 'Bricolage'; src: url('../fonts/BricolageGrotesque-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Bricolage'; src: url('../fonts/BricolageGrotesque-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
-@font-face { font-family: 'Instrument'; src: url('../fonts/InstrumentSans-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Instrument'; src: url('../fonts/InstrumentSans-Bold.ttf') format('truetype'); font-weight: 650; font-display: swap; }
+@font-face { font-family: 'Geist'; src: url('../fonts/Geist-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Geist'; src: url('../fonts/Geist-Medium.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Geist'; src: url('../fonts/Geist-SemiBold.ttf') format('truetype'); font-weight: 650; font-display: swap; }
+@font-face { font-family: 'Geist'; src: url('../fonts/Geist-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'GeistMono'; src: url('../fonts/GeistMono-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'GeistMono'; src: url('../fonts/GeistMono-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 
@@ -64,8 +64,8 @@
     --noise-opacity: 0.05;
     --sidebar-w: 260px;
 
-    --font-display: 'Bricolage', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-body: 'Instrument', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-display: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-body: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-mono: 'GeistMono', ui-monospace, "SF Mono", Consolas, monospace;
 }
 
@@ -467,7 +467,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
     flex: 1;
     min-width: 0;
     padding: 34px 40px 64px;
-    max-width: 1120px;
+    max-width: 1600px;
 }
 
 .page-header {
@@ -610,7 +610,10 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-
 }
 .link-realizado:hover { filter: brightness(1.2); }
 
-.table-scroll { overflow-x: auto; margin: -4px -4px 0; padding: 4px; border-radius: var(--radius-sm); }
+.table-scroll { overflow-x: auto; margin: -4px -4px 0; padding: 4px; border-radius: var(--radius-sm); transition: box-shadow 0.15s ease; }
+/* Indica que passar o mouse aqui habilita rolar com as setas do teclado. */
+.table-scroll:hover { box-shadow: inset 0 0 0 1px var(--border); }
+.table-scroll-dica { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
 
 /* -------------------------------------------------------------------------
    Última coluna (Ações) fixa na borda direita: numa tabela larga que precisa
@@ -698,12 +701,8 @@ form.stack { display: flex; flex-direction: column; gap: 15px; max-width: 520px;
 /* ".row" pode ser um <div> dentro do form OU o próprio <form> ter a classe
    — os dois casos precisam do mesmo layout (o seletor só com espaço
    "form .row" não pega o segundo caso, form.row). */
-form.row, form .row { display: flex; gap: 12px; flex-wrap: wrap; }
-/* Rótulos de tamanhos diferentes (um quebra em 2 linhas, outro não) não
-   podem empurrar o campo abaixo pra alturas diferentes — cada item vira
-   uma coluna com o conteúdo "grudado" embaixo, então os campos sempre
-   alinham na mesma linha independente do rótulo. */
-form.row > *, form .row > * { flex: 1; min-width: 160px; display: flex; flex-direction: column; justify-content: flex-end; }
+form.row, form .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+form.row > *, form .row > * { flex: 1; min-width: 160px; }
 
 /* Barra de filtros (Fluxo, Crédito): muitos campos pequenos — um grid se
    organiza melhor que flex-wrap, que faz cada campo "sobrando" virar uma
@@ -723,12 +722,17 @@ form.row > *, form .row > * { flex: 1; min-width: 160px; display: flex; flex-dir
     .form-filtros .acoes { grid-column: 1 / -1; }
 }
 
+/* Altura mínima reservada pra 2 linhas: rótulo curto e rótulo que quebra
+   em 2 linhas (num campo vizinho na mesma "row") passam a ocupar o mesmo
+   espaço, então os campos abaixo sempre começam na mesma altura. */
 label {
     font-size: 12.5px;
     color: var(--text-dim);
     display: block;
+    min-height: 30px;
     margin-bottom: 6px;
     font-weight: 600;
+    line-height: 1.3;
 }
 
 input, select, textarea {
@@ -874,6 +878,9 @@ input[type="color"]:focus-visible {
 .inline-update { display: flex; gap: 6px; align-items: center; }
 .inline-update input { width: 72px; max-width: 72px; }
 .inline-update button { white-space: nowrap; padding-left: 12px; padding-right: 12px; }
+/* Renda Fixa lida com valores bem maiores (milhares de reais) do que os
+   72px genéricos comportam sem cortar o texto digitado. */
+.tabela-renda-fixa .inline-update input { width: 100px; max-width: 100px; }
 
 /* ---------------------------------------------------------------------
    Campos condicionais (aparecem/somem conforme outra escolha do form) —

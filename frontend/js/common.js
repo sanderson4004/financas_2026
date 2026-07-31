@@ -358,6 +358,34 @@ function ligarInteracaoLinha(svgId, coords, formatarTooltip) {
     });
 }
 
+// Rolagem horizontal de tabela por teclado (setas ← →), igual planilha:
+// a barra de rolagem só existe embaixo da tabela inteira, o que é inútil
+// numa tabela com muitas linhas. Passando o mouse sobre a tabela (sem
+// precisar clicar/focar em nada), as setas rolam ela pros lados de
+// qualquer altura em que o usuário esteja.
+function ligarScrollTecladoTabelas() {
+    let tabelaAtiva = null;
+
+    document.querySelectorAll('.table-scroll').forEach(el => {
+        el.addEventListener('mouseenter', () => { tabelaAtiva = el; });
+        el.addEventListener('mouseleave', () => { if (tabelaAtiva === el) tabelaAtiva = null; });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (!tabelaAtiva) return;
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+
+        const focoAtual = document.activeElement;
+        const editandoCampo = focoAtual && ['INPUT', 'SELECT', 'TEXTAREA'].includes(focoAtual.tagName);
+        if (editandoCampo) return;
+
+        e.preventDefault();
+        tabelaAtiva.scrollBy({ left: e.key === 'ArrowRight' ? 160 : -160, behavior: 'smooth' });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', ligarScrollTecladoTabelas);
+
 async function requireAuth() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {

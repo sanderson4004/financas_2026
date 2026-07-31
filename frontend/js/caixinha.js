@@ -9,9 +9,7 @@ async function carregarResumo() {
     const resumoEl = document.getElementById('resumo');
     resumoEl.innerHTML = `
         <div class="stat" style="--tint: var(--accent)"><div class="label">Saldo atual</div><div class="value" data-contagem="${Number(data.saldo_atual)}"></div></div>
-        <div class="stat" style="--tint: var(--c6)"><div class="label">Total aportado</div><div class="value" data-contagem="${Number(data.total_aportado)}"></div></div>
         <div class="stat" style="--tint: var(--ok)"><div class="label">Rendimento automático</div><div class="value" data-contagem="${Number(data.rendimento_automatico_acumulado)}"></div></div>
-        <div class="stat" style="--tint: var(--pending)"><div class="label">Total resgatado</div><div class="value" data-contagem="${Number(data.total_resgatado)}"></div></div>
         <div class="stat" style="--tint: var(--c6)"><div class="label">Total bruto (app)</div><div class="value" data-contagem="${Number(data.total_bruto_app)}"></div></div>
         <div class="stat" style="--tint: var(--accent-2)"><div class="label">Total líquido (app)</div><div class="value" data-contagem="${Number(data.total_liquido_app)}"></div></div>
         <div class="stat" style="--tint: var(--bad)"><div class="label">Imposto real (bruto − líquido)</div><div class="value" data-contagem="${Number(data.imposto_real)}"></div></div>
