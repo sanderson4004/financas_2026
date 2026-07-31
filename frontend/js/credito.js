@@ -76,51 +76,96 @@ function renderLinhaCompra(c, parcelas) {
     `;
 }
 
-function renderLinhaDetalhe(c, parcelas, aberta) {
+// O painel de parcelas abre FORA da <table> de compras (num container
+// próprio, logo abaixo dela) — não dentro de uma linha colspan. Uma
+// tabela "auto" (que encolhe pro conteúdo das colunas visíveis, evitando
+// vãos feios) força uma linha de detalhe larga a ficar espremida na
+// mesma largura estreita; só uma tabela vira colspan, e o algoritmo de
+// auto-layout do navegador redistribui a largura de forma desigual entre
+// as colunas (a coluna Valor, por exemplo, quase some). Ficando fora da
+// tabela, o painel usa a largura do card livremente, sem afetar as
+// colunas da tabela de cima. Só um painel fica aberto por vez.
+let compraAberta = null;
+
+function renderLinhaDetalhe(c, parcelas) {
     return `
-        <tr class="parcelas-detail" id="detalhe-${c.id}" style="display:${aberta ? 'table-row' : 'none'}">
-            <td colspan="7">
-                <div class="parcelas-panel">
-                    <p class="msg hint">Reajuste de assinatura ou correção de valor? Informe o intervalo de parcelas e o novo valor — dá pra aplicar num trecho (ex: 9 até 12) ou em todas de uma vez (1 até ${c.total_parcelas}). Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
-                    <form class="row parcelas-range-form" data-compra-id="${c.id}">
-                        <div>
-                            <label>Da parcela nº</label>
-                            <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-de" required>
-                        </div>
-                        <div>
-                            <label>até a nº</label>
-                            <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-ate" required>
-                        </div>
-                        <div>
-                            <label>Novo valor (R$)</label>
-                            <input type="number" step="0.01" class="range-valor" required>
-                        </div>
-                        <div style="align-self:flex-end">
-                            <button type="submit" class="secondary">Aplicar</button>
-                        </div>
-                    </form>
-                    <div class="msg" id="parcelas-msg-${c.id}" aria-live="polite"></div>
-                    <div class="table-scroll">
-                        <table>
-                            <thead>
-                                <tr><th>Nº</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th></tr>
-                            </thead>
-                            <tbody>
-                                ${parcelas.map(p => `
-                                    <tr>
-                                        <td>${p.numero_parcela}</td>
-                                        <td>${formatDate(p.data_vencimento)}</td>
-                                        <td class="num">${formatMoney(p.valor_parcela)}</td>
-                                        <td>${p.pago ? '<span class="pill status-ok">PAGA</span>' : '<span class="pill status-pending">EM ABERTO</span>'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="parcelas-panel" id="detalhe-${c.id}">
+            <p class="msg hint">Reajuste de assinatura ou correção de valor? Informe o intervalo de parcelas e o novo valor — dá pra aplicar num trecho (ex: 9 até 12) ou em todas de uma vez (1 até ${c.total_parcelas}). Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
+            <form class="row parcelas-range-form" data-compra-id="${c.id}">
+                <div>
+                    <label>Da parcela nº</label>
+                    <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-de" required>
                 </div>
-            </td>
-        </tr>
+                <div>
+                    <label>até a nº</label>
+                    <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-ate" required>
+                </div>
+                <div>
+                    <label>Novo valor (R$)</label>
+                    <input type="number" step="0.01" class="range-valor" required>
+                </div>
+                <div style="align-self:flex-end">
+                    <button type="submit" class="secondary">Aplicar</button>
+                </div>
+            </form>
+            <p class="msg hint">Vencimento errado ou parcela reagendada? Informe o intervalo e a nova data da PRIMEIRA parcela do intervalo — as seguintes são recalculadas mantendo 1 mês de distância entre elas. Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
+            <form class="row parcelas-data-form" data-compra-id="${c.id}">
+                <div>
+                    <label>Da parcela nº</label>
+                    <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-data-de" required>
+                </div>
+                <div>
+                    <label>até a nº</label>
+                    <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-data-ate" required>
+                </div>
+                <div>
+                    <label>Novo vencimento (1ª do intervalo)</label>
+                    <input type="date" class="range-data-valor" required>
+                </div>
+                <div style="align-self:flex-end">
+                    <button type="submit" class="secondary">Aplicar</button>
+                </div>
+            </form>
+            <div class="msg" id="parcelas-msg-${c.id}" aria-live="polite"></div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr><th>Nº</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th></tr>
+                    </thead>
+                    <tbody>
+                        ${parcelas.map(p => `
+                            <tr>
+                                <td>${p.numero_parcela}</td>
+                                <td>${formatDate(p.data_vencimento)}</td>
+                                <td class="num">${formatMoney(p.valor_parcela)}</td>
+                                <td>${p.pago ? '<span class="pill status-ok">PAGA</span>' : '<span class="pill status-pending">EM ABERTO</span>'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     `;
+}
+
+async function abrirParcelas(compraId) {
+    const container = document.getElementById('parcelas-detalhe-container');
+
+    if (compraAberta === compraId) {
+        compraAberta = null;
+        container.innerHTML = '';
+        return;
+    }
+
+    const { data: c } = await sb.from('compras_credito').select('*, categorias(nome, cor)').eq('id', compraId).single();
+    const { data: parcelas } = await sb
+        .from('parcelas_credito')
+        .select('id, compra_id, numero_parcela, data_vencimento, valor_parcela, pago')
+        .eq('compra_id', compraId)
+        .order('numero_parcela');
+
+    compraAberta = compraId;
+    container.innerHTML = renderLinhaDetalhe(c, parcelas || []);
 }
 
 async function carregarCompras() {
@@ -166,7 +211,12 @@ async function carregarCompras() {
         porCompra[p.compra_id].push(p);
     }
 
-    tbody.innerHTML = compras.map(c => renderLinhaCompra(c, porCompra[c.id] || []) + renderLinhaDetalhe(c, porCompra[c.id] || [], false)).join('');
+    tbody.innerHTML = compras.map(c => renderLinhaCompra(c, porCompra[c.id] || [])).join('');
+
+    if (compraAberta && !ids.includes(compraAberta)) {
+        compraAberta = null;
+        document.getElementById('parcelas-detalhe-container').innerHTML = '';
+    }
 }
 
 async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
@@ -178,7 +228,10 @@ async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
         .order('numero_parcela');
 
     document.getElementById(`compra-${compraId}`).outerHTML = renderLinhaCompra(c, parcelas || []);
-    document.getElementById(`detalhe-${compraId}`).outerHTML = renderLinhaDetalhe(c, parcelas || [], manterAberta);
+
+    if (manterAberta) {
+        document.getElementById('parcelas-detalhe-container').innerHTML = renderLinhaDetalhe(c, parcelas || []);
+    }
 
     if (manterAberta && mensagemSucesso) {
         const msg = document.getElementById(`parcelas-msg-${compraId}`);
@@ -339,8 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     tbody.addEventListener('click', async (e) => {
         const toggleBtn = e.target.closest('button[data-toggle-parcelas]');
         if (toggleBtn) {
-            const linha = document.getElementById(`detalhe-${toggleBtn.getAttribute('data-toggle-parcelas')}`);
-            linha.style.display = linha.style.display === 'none' ? 'table-row' : 'none';
+            await abrirParcelas(parseInt(toggleBtn.getAttribute('data-toggle-parcelas'), 10));
             return;
         }
 
@@ -362,7 +414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    tbody.addEventListener('submit', async (e) => {
+    document.addEventListener('submit', async (e) => {
         const form = e.target.closest('form.parcelas-range-form');
         if (!form) return;
         e.preventDefault();
@@ -399,6 +451,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             await atualizarLinhaCompra(compraId, true, `Parcelas ${de} a ${ate} atualizadas para ${formatMoney(novoValor)}.`);
             toast('Parcelas atualizadas.');
+        });
+    });
+
+    document.addEventListener('submit', async (e) => {
+        const form = e.target.closest('form.parcelas-data-form');
+        if (!form) return;
+        e.preventDefault();
+
+        const compraId = form.getAttribute('data-compra-id');
+        const de = parseInt(form.querySelector('.range-data-de').value, 10);
+        const ate = parseInt(form.querySelector('.range-data-ate').value, 10);
+        const novaData = form.querySelector('.range-data-valor').value;
+        const msg = document.getElementById(`parcelas-msg-${compraId}`);
+        const btn = form.querySelector('button[type="submit"]');
+
+        if (!de || !ate || de > ate || !novaData) {
+            msg.textContent = 'Preencha um intervalo válido (nº inicial ≤ nº final) e a nova data.';
+            msg.className = 'msg error';
+            return;
+        }
+
+        msg.textContent = 'Salvando...';
+        msg.className = 'msg';
+
+        await comBotaoOcupado(btn, async () => {
+            const atualizacoes = [];
+            for (let n = de; n <= ate; n++) {
+                atualizacoes.push(
+                    sb.from('parcelas_credito')
+                        .update({ data_vencimento: somarMeses(novaData, n - de) })
+                        .eq('compra_id', compraId)
+                        .eq('numero_parcela', n)
+                );
+            }
+            const resultados = await Promise.all(atualizacoes);
+            const erro = resultados.find(r => r.error);
+
+            if (erro) {
+                msg.textContent = `Erro: ${erro.error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
+
+            await atualizarLinhaCompra(compraId, true, `Vencimento das parcelas ${de} a ${ate} atualizado.`);
+            toast('Vencimento das parcelas atualizado.');
         });
     });
 
