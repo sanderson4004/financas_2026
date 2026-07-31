@@ -122,9 +122,9 @@
         --accent: #2c4bff; --accent-2: #00b3a4; --accent-soft: rgba(44,75,255,.09); --accent-glow: rgba(44,75,255,.24);
         --ok: #0aa66a; --ok-soft: rgba(10,166,106,.1); --bad: #e11d48; --bad-soft: rgba(225,29,72,.1);
         --pending: #d97706; --pending-soft: rgba(217,119,6,.1);
-        --carater-receita: #0f8c58; --carater-despesa: #cf3050; --carater-reserva: #a5680a;
-        --carater-transferencia: #0891a8; --carater-excluido: #8790a0;
-        --c1: #2f5fd6; --c2: #0f8c58; --c3: #a5680a; --c4: #cf3050; --c5: #0891a8; --c6: #6b7280;
+        --carater-receita: #0aa66a; --carater-despesa: #e11d48; --carater-reserva: #d97706;
+        --carater-transferencia: #00b3a4; --carater-excluido: #8790a0;
+        --c1: #2c4bff; --c2: #0aa66a; --c3: #d97706; --c4: #e11d48; --c5: #00b3a4; --c6: #6b7280;
         --shadow: 0 30px 70px rgba(16,20,35,.12); --shadow-soft: 0 10px 28px rgba(16,20,35,.07);
         --sheen: inset 0 1px 0 rgba(255,255,255,.7); --noise-opacity: 0.02;
     }
@@ -736,6 +736,10 @@ input:focus, select:focus, textarea:focus {
 }
 
 input::placeholder { color: var(--text-faint); }
+
+/* Campo somente-leitura (ex: código de categoria auto-gerado) — visual
+   distinto de um campo editável comum, sem parecer desabilitado/inerte. */
+input[readonly] { background: var(--panel-2); color: var(--text-dim); cursor: default; }
 
 /* Números alinhados à direita e sem as setinhas nativas do navegador —
    consistente com as colunas .num das tabelas, e sem o "spinner" que não
