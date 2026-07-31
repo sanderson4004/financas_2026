@@ -40,6 +40,8 @@ function lerFiltrosCredito() {
         categoria: document.getElementById('f-categoria').value,
         dataDe: document.getElementById('f-data-de').value,
         dataAte: document.getElementById('f-data-ate').value,
+        vencDe: document.getElementById('f-venc-de').value,
+        vencAte: document.getElementById('f-venc-ate').value,
     };
 }
 
@@ -76,58 +78,61 @@ function renderLinhaCompra(c, parcelas) {
     `;
 }
 
-// O painel de parcelas abre FORA da <table> de compras (num container
-// próprio, logo abaixo dela) — não dentro de uma linha colspan. Uma
-// tabela "auto" (que encolhe pro conteúdo das colunas visíveis, evitando
-// vãos feios) força uma linha de detalhe larga a ficar espremida na
-// mesma largura estreita; só uma tabela vira colspan, e o algoritmo de
-// auto-layout do navegador redistribui a largura de forma desigual entre
-// as colunas (a coluna Valor, por exemplo, quase some). Ficando fora da
-// tabela, o painel usa a largura do card livremente, sem afetar as
-// colunas da tabela de cima. Só um painel fica aberto por vez.
+// O painel de parcelas abre num modal sobreposto (não mais dentro da
+// <table> de compras nem no final da página) — só um fica aberto por vez.
 let compraAberta = null;
 
 function renderLinhaDetalhe(c, parcelas) {
     return `
         <div class="parcelas-panel" id="detalhe-${c.id}">
-            <p class="msg hint">Reajuste de assinatura ou correção de valor? Informe o intervalo de parcelas e o novo valor — dá pra aplicar num trecho (ex: 9 até 12) ou em todas de uma vez (1 até ${c.total_parcelas}). Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
-            <form class="row parcelas-range-form" data-compra-id="${c.id}">
-                <div>
+            <div>
+                <span>Reajustar valor de um intervalo de parcelas</span>
+                <button type="button" class="ajuda-toggle" data-ajuda="ajuda-valor-${c.id}" aria-expanded="false" aria-label="Ajuda">?</button>
+            </div>
+            <p class="msg hint ajuda-texto" id="ajuda-valor-${c.id}">Reajuste de assinatura ou correção de valor? Informe o intervalo de parcelas e o novo valor — dá pra aplicar num trecho (ex: 9 até 12) ou em todas de uma vez (1 até ${c.total_parcelas}). Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
+            <form class="form-compacto parcelas-range-form" data-compra-id="${c.id}">
+                <div class="campo-curto">
                     <label>Da parcela nº</label>
                     <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-de" required>
                 </div>
-                <div>
+                <div class="campo-curto">
                     <label>até a nº</label>
                     <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-ate" required>
                 </div>
-                <div>
+                <div class="campo-valor">
                     <label>Novo valor (R$)</label>
                     <input type="number" step="0.01" class="range-valor" required>
                 </div>
-                <div style="align-self:flex-end">
+                <div>
                     <button type="submit" class="secondary">Aplicar</button>
                 </div>
             </form>
-            <p class="msg hint">Vencimento errado ou parcela reagendada? Informe o intervalo e a nova data da PRIMEIRA parcela do intervalo — as seguintes são recalculadas mantendo 1 mês de distância entre elas. Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
-            <form class="row parcelas-data-form" data-compra-id="${c.id}">
-                <div>
+
+            <div style="margin-top:18px">
+                <span>Corrigir vencimento de um intervalo de parcelas</span>
+                <button type="button" class="ajuda-toggle" data-ajuda="ajuda-data-${c.id}" aria-expanded="false" aria-label="Ajuda">?</button>
+            </div>
+            <p class="msg hint ajuda-texto" id="ajuda-data-${c.id}">Vencimento errado ou parcela reagendada? Informe o intervalo e a nova data da PRIMEIRA parcela do intervalo — as seguintes são recalculadas mantendo 1 mês de distância entre elas. Pra mudar uma parcela só, use o mesmo número no início e no fim.</p>
+            <form class="form-compacto parcelas-data-form" data-compra-id="${c.id}">
+                <div class="campo-curto">
                     <label>Da parcela nº</label>
                     <input type="number" min="1" max="${c.total_parcelas}" value="1" class="range-data-de" required>
                 </div>
-                <div>
+                <div class="campo-curto">
                     <label>até a nº</label>
                     <input type="number" min="1" max="${c.total_parcelas}" value="${c.total_parcelas}" class="range-data-ate" required>
                 </div>
-                <div>
+                <div class="campo-data">
                     <label>Novo vencimento (1ª do intervalo)</label>
                     <input type="date" class="range-data-valor" required>
                 </div>
-                <div style="align-self:flex-end">
+                <div>
                     <button type="submit" class="secondary">Aplicar</button>
                 </div>
             </form>
-            <div class="msg" id="parcelas-msg-${c.id}" aria-live="polite"></div>
-            <div class="table-scroll">
+
+            <div class="msg" id="parcelas-msg-${c.id}" aria-live="polite" style="margin-top:8px"></div>
+            <div class="table-scroll" style="margin-top:12px">
                 <table>
                     <thead>
                         <tr><th>Nº</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th></tr>
@@ -148,15 +153,13 @@ function renderLinhaDetalhe(c, parcelas) {
     `;
 }
 
+function fecharModalParcelas() {
+    const overlay = document.getElementById('parcelas-modal-overlay');
+    if (overlay) overlay.remove();
+    compraAberta = null;
+}
+
 async function abrirParcelas(compraId) {
-    const container = document.getElementById('parcelas-detalhe-container');
-
-    if (compraAberta === compraId) {
-        compraAberta = null;
-        container.innerHTML = '';
-        return;
-    }
-
     const { data: c } = await sb.from('compras_credito').select('*, categorias(nome, cor)').eq('id', compraId).single();
     const { data: parcelas } = await sb
         .from('parcelas_credito')
@@ -164,8 +167,27 @@ async function abrirParcelas(compraId) {
         .eq('compra_id', compraId)
         .order('numero_parcela');
 
+    fecharModalParcelas();
     compraAberta = compraId;
-    container.innerHTML = renderLinhaDetalhe(c, parcelas || []);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'parcelas-modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal-box modal-box-lg">
+            <div class="modal-header">
+                <h3>Parcelas — ${c.descricao}</h3>
+                <button type="button" class="modal-fechar" aria-label="Fechar">×</button>
+            </div>
+            ${renderLinhaDetalhe(c, parcelas || [])}
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) fecharModalParcelas();
+    });
+    overlay.querySelector('.modal-fechar').addEventListener('click', fecharModalParcelas);
 }
 
 async function carregarCompras() {
@@ -174,6 +196,29 @@ async function carregarCompras() {
     tbody.innerHTML = carregandoLinhaHTML(7);
 
     const f = lerFiltrosCredito();
+    let idsFiltroVencimento = null;
+
+    if (f.vencDe || f.vencAte) {
+        let queryParcelas = sb.from('parcelas_credito').select('compra_id');
+        if (f.vencDe) queryParcelas = queryParcelas.gte('data_vencimento', f.vencDe);
+        if (f.vencAte) queryParcelas = queryParcelas.lte('data_vencimento', f.vencAte);
+
+        const { data: parcelasNoIntervalo, error: errVenc } = await queryParcelas;
+        if (errVenc) {
+            renderErroLinha(tbody, 7, errVenc.message, carregarCompras);
+            info.textContent = '';
+            return;
+        }
+
+        const idsComVencimento = [...new Set((parcelasNoIntervalo || []).map(p => p.compra_id))];
+        if (idsComVencimento.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7">${estadoVazioHTML('Nenhuma parcela vence nesse período.', '📅')}</td></tr>`;
+            info.textContent = '';
+            return;
+        }
+        idsFiltroVencimento = idsComVencimento;
+    }
+
     let query = sb.from('compras_credito').select('*, categorias(nome, cor)').order('id', { ascending: false });
 
     if (f.busca) query = query.ilike('descricao', `%${f.busca}%`);
@@ -181,6 +226,7 @@ async function carregarCompras() {
     if (f.categoria) query = query.eq('categoria_codigo', f.categoria);
     if (f.dataDe) query = query.gte('data_compra', f.dataDe);
     if (f.dataAte) query = query.lte('data_compra', f.dataAte);
+    if (idsFiltroVencimento) query = query.in('id', idsFiltroVencimento);
 
     const { data: compras, error } = await query;
 
@@ -214,8 +260,7 @@ async function carregarCompras() {
     tbody.innerHTML = compras.map(c => renderLinhaCompra(c, porCompra[c.id] || [])).join('');
 
     if (compraAberta && !ids.includes(compraAberta)) {
-        compraAberta = null;
-        document.getElementById('parcelas-detalhe-container').innerHTML = '';
+        fecharModalParcelas();
     }
 }
 
@@ -230,7 +275,7 @@ async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
     document.getElementById(`compra-${compraId}`).outerHTML = renderLinhaCompra(c, parcelas || []);
 
     if (manterAberta) {
-        document.getElementById('parcelas-detalhe-container').innerHTML = renderLinhaDetalhe(c, parcelas || []);
+        document.getElementById(`detalhe-${compraId}`).outerHTML = renderLinhaDetalhe(c, parcelas || []);
     }
 
     if (manterAberta && mensagemSucesso) {
@@ -319,6 +364,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarCompras();
     await carregarFaturasFechadas();
     makeSortable('rows');
+
+    document.addEventListener('click', (e) => {
+        const ajudaBtn = e.target.closest('button.ajuda-toggle');
+        if (!ajudaBtn) return;
+        const texto = document.getElementById(ajudaBtn.getAttribute('data-ajuda'));
+        const aberta = texto.classList.toggle('aberta');
+        ajudaBtn.setAttribute('aria-expanded', aberta ? 'true' : 'false');
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('parcelas-modal-overlay')) {
+            fecharModalParcelas();
+        }
+    });
 
     document.getElementById('fatura-consultar').addEventListener('click', consultarFaturaAberta);
 
