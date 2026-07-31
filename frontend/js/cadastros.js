@@ -37,6 +37,28 @@ async function carregarCategoriasCadastro() {
     });
 }
 
+// Código de categoria vira automático (#A, #B, #C...) em vez de digitado
+// à mão — evita colisão e a fricção de escolher/lembrar qual letra já
+// está em uso.
+async function preencherProximoCodigoCategoria() {
+    const { data, error } = await sb.from('categorias').select('codigo');
+    const input = document.getElementById('cat-codigo');
+    if (error) {
+        input.value = '';
+        return;
+    }
+
+    const usados = new Set((data || []).map(c => c.codigo));
+    for (let i = 0; i < 26; i++) {
+        const codigo = `#${String.fromCharCode(65 + i)}`;
+        if (!usados.has(codigo)) {
+            input.value = codigo;
+            return;
+        }
+    }
+    input.value = `#${Date.now()}`;
+}
+
 async function carregarCategoriaSelectVigencia() {
     const sel = document.getElementById('vig-categoria');
     const { data, error } = await sb
@@ -85,7 +107,7 @@ async function carregarVigencias() {
             <td>${m.categoria_codigo} — ${m.categorias ? m.categorias.nome : ''}</td>
             <td>${STATUS_LABEL_TIPO[m.tipo_teto] || m.tipo_teto}</td>
             <td>${m.janela_acumulo ? (STATUS_LABEL_JANELA[m.janela_acumulo] || m.janela_acumulo) : '—'}</td>
-            <td class="num">${m.valor_teto === null ? 'auto (Reserva)' : formatMoney(m.valor_teto)}</td>
+            <td class="num">${m.valor_teto === null ? 'auto (Reserva)' : `<input type="number" step="0.01" id="valor-${m.id}" value="${m.valor_teto}" style="width:110px">`}</td>
             <td><input type="date" id="inicio-${m.id}" value="${m.vigencia_inicio}"></td>
             <td><input type="date" id="fim-${m.id}" value="${m.vigencia_fim || ''}"></td>
             <td id="status-${m.id}"><span class="pill ${vigente ? 'status-ok' : 'status-pending'}">${vigente ? 'VIGENTE' : 'ENCERRADA'}</span></td>
@@ -126,11 +148,16 @@ async function carregarVigencias() {
             if (!inicio) { alert('Data de início é obrigatória.'); return; }
             if (fim && fim < inicio) { alert('A data fim não pode ser anterior à data início.'); return; }
 
+            const payload = { vigencia_inicio: inicio, vigencia_fim: fim || null };
+            const valorInput = document.getElementById(`valor-${id}`);
+            if (valorInput) {
+                const valor = parseFloat(valorInput.value);
+                if (isNaN(valor)) { alert('Valor da meta inválido.'); return; }
+                payload.valor_teto = valor;
+            }
+
             await comBotaoOcupado(btn, async () => {
-                const { error } = await sb.from('metas').update({
-                    vigencia_inicio: inicio,
-                    vigencia_fim: fim || null,
-                }).eq('id', id);
+                const { error } = await sb.from('metas').update(payload).eq('id', id);
 
                 if (error) {
                     alert(`Erro ao salvar: ${error.message}`);
@@ -252,6 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!session) return;
 
     await carregarCategoriasCadastro();
+    await preencherProximoCodigoCategoria();
     await carregarCategoriaSelectVigencia();
     await carregarVigencias();
     await carregarListaCadastro('metodos_pagamento', 'met-rows', true);
@@ -332,12 +360,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            msg.textContent = 'Categoria cadastrada.';
+            msg.textContent = `Categoria ${payload.codigo} cadastrada.`;
             msg.className = 'msg success';
             document.getElementById('categoria-form').reset();
             await carregarCategoriasCadastro();
             await carregarCategoriaSelectVigencia();
-            toast('Categoria cadastrada.');
+            await preencherProximoCodigoCategoria();
+            toast(`Categoria ${payload.codigo} cadastrada.`);
         });
     });
 
