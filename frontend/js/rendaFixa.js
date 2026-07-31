@@ -24,7 +24,7 @@ async function carregarRendaFixa() {
             <td>
                 <div class="inline-update">
                     <input type="number" step="0.01" value="${r.valor_bruto_atual}" id="upd-bruto-${r.id}" title="Valor bruto atual">
-                    <input type="number" step="0.01" value="${r.valor_liquido_informado ?? ''}" id="upd-liquido-${r.id}" title="Valor líquido informado pelo banco" placeholder="líquido informado">
+                    <input type="number" step="0.01" value="${r.valor_liquido_informado ?? ''}" id="upd-liquido-${r.id}" title="Valor líquido informado pelo banco" placeholder="líquido">
                     <button type="button" class="secondary" data-id="${r.id}">Salvar</button>
                 </div>
             </td>

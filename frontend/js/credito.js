@@ -30,6 +30,7 @@ async function carregarCartoes() {
     const opcoes = data.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
     document.getElementById('cartao').innerHTML = opcoes;
     document.getElementById('f-cartao').innerHTML = '<option value="">Todos</option>' + opcoes;
+    document.getElementById('fatura-cartao').innerHTML = opcoes;
 }
 
 function lerFiltrosCredito() {
@@ -186,6 +187,76 @@ async function atualizarLinhaCompra(compraId, manterAberta, mensagemSucesso) {
     }
 }
 
+async function carregarFaturasFechadas() {
+    const tbody = document.getElementById('fatura-rows');
+    const { data, error } = await sb
+        .from('fechamentos_fatura')
+        .select('id, cartao, data_fechamento, valor_total, lancamento_fluxo_id')
+        .order('data_fechamento', { ascending: false });
+
+    if (error) {
+        renderErroLinha(tbody, 4, error.message, carregarFaturasFechadas);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">${estadoVazioHTML('Nenhuma fatura fechada ainda.', '🧾')}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.map(f => `
+        <tr>
+            <td>${f.cartao}</td>
+            <td>${formatDate(f.data_fechamento)}</td>
+            <td class="num">${formatMoney(f.valor_total)}</td>
+            <td><button type="button" class="danger" data-estornar-fatura="${f.lancamento_fluxo_id}">Estornar</button></td>
+        </tr>
+    `).join('');
+}
+
+async function consultarFaturaAberta() {
+    const cartao = document.getElementById('fatura-cartao').value;
+    const dataFechamento = document.getElementById('fatura-data').value;
+    const preview = document.getElementById('fatura-preview');
+    const wrapConfirmar = document.getElementById('fatura-confirmar-wrap');
+    wrapConfirmar.style.display = 'none';
+
+    if (!cartao || !dataFechamento) {
+        preview.textContent = 'Escolha o cartão e a data de fechamento.';
+        preview.className = 'msg error';
+        return;
+    }
+
+    preview.textContent = 'Consultando...';
+    preview.className = 'msg';
+
+    const { data, error } = await sb
+        .from('credito_resolvido')
+        .select('parcela_id, valor_parcela')
+        .eq('cartao', cartao)
+        .eq('pago', false)
+        .lte('data_vencimento', dataFechamento);
+
+    if (error) {
+        preview.textContent = `Erro: ${error.message}`;
+        preview.className = 'msg error';
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        preview.textContent = 'Nenhuma parcela em aberto para esse cartão até essa data.';
+        preview.className = 'msg';
+        return;
+    }
+
+    const total = data.reduce((s, p) => s + Number(p.valor_parcela), 0);
+    preview.innerHTML = `${data.length} parcela(s) em aberto, totalizando <strong style="color:var(--text)">${formatMoney(total)}</strong> — esse valor será debitado do Saldo Nubank.`;
+    preview.className = 'msg';
+    wrapConfirmar.style.display = 'block';
+    wrapConfirmar.dataset.cartao = cartao;
+    wrapConfirmar.dataset.data = dataFechamento;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const session = await requireAuth();
     if (!session) return;
@@ -193,7 +264,65 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarCategorias();
     await carregarCartoes();
     await carregarCompras();
+    await carregarFaturasFechadas();
     makeSortable('rows');
+
+    document.getElementById('fatura-consultar').addEventListener('click', consultarFaturaAberta);
+
+    document.getElementById('fatura-confirmar').addEventListener('click', async (e) => {
+        const btn = e.target;
+        const wrapConfirmar = document.getElementById('fatura-confirmar-wrap');
+        const msg = document.getElementById('fatura-msg');
+        const cartao = wrapConfirmar.dataset.cartao;
+        const dataFechamento = wrapConfirmar.dataset.data;
+
+        const ok = await confirmarAcao(`Fechar a fatura de "${cartao}" com vencimento até ${formatDate(dataFechamento)}? Isso vai debitar o valor do Saldo Nubank em Fluxo.`, 'Sim, fechar fatura');
+        if (!ok) return;
+
+        msg.textContent = 'Fechando fatura...';
+        msg.className = 'msg';
+
+        await comBotaoOcupado(btn, async () => {
+            const { data, error } = await sb.rpc('fechar_fatura_cartao', {
+                p_cartao: cartao,
+                p_data_fechamento: dataFechamento,
+            });
+
+            if (error) {
+                msg.textContent = `Erro: ${error.message}`;
+                msg.className = 'msg error';
+                return;
+            }
+
+            msg.textContent = `Fatura fechada: ${formatMoney(data.valor_total)} debitados do Saldo Nubank.`;
+            msg.className = 'msg success';
+            wrapConfirmar.style.display = 'none';
+            document.getElementById('fatura-preview').textContent = '';
+            await carregarCompras();
+            await carregarFaturasFechadas();
+            toast('Fatura fechada e abatida do Saldo Nubank.');
+        });
+    });
+
+    document.getElementById('fatura-rows').addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-estornar-fatura]');
+        if (!btn) return;
+
+        const lancamentoId = btn.getAttribute('data-estornar-fatura');
+        const ok = await confirmarAcao('Estornar este fechamento de fatura? As parcelas cobertas voltam a "em aberto" e o débito no Fluxo é desfeito.', 'Sim, estornar');
+        if (!ok) return;
+
+        await comBotaoOcupado(btn, async () => {
+            const { error } = await sb.from('lancamentos_fluxo').delete().eq('id', lancamentoId);
+            if (error) {
+                alert(`Erro ao estornar: ${error.message}`);
+                return;
+            }
+            await carregarCompras();
+            await carregarFaturasFechadas();
+            toast('Fechamento estornado.');
+        });
+    });
 
     document.getElementById('filtro-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -315,7 +444,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 compra_id: compra.id,
                 numero_parcela: n,
                 data_vencimento: somarMeses(dataPrimeiroVencimento, n - 1),
-                pago: false,
                 categoria_codigo: compraPayload.categoria_codigo,
                 valor_parcela: valorParcela,
             });

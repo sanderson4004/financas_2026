@@ -61,6 +61,44 @@
                 </div>
 
                 <div class="card">
+                    <h2>Fechar fatura do cartão</h2>
+                    <p class="msg hint">Fecha as parcelas em aberto de um cartão até a data escolhida e lança o abatimento no Saldo Nubank (Fluxo) automaticamente — só então elas somem de "em aberto" aqui.</p>
+                    <form id="fatura-form" class="row" style="align-items:flex-end; flex-wrap:wrap">
+                        <div>
+                            <label for="fatura-cartao">Cartão</label>
+                            <select id="fatura-cartao" required></select>
+                        </div>
+                        <div>
+                            <label for="fatura-data">Data de fechamento</label>
+                            <input type="date" id="fatura-data" required>
+                        </div>
+                        <div>
+                            <button type="button" class="secondary" id="fatura-consultar">Consultar</button>
+                        </div>
+                    </form>
+                    <div id="fatura-preview" class="msg" style="margin-top:10px" aria-live="polite"></div>
+                    <div id="fatura-confirmar-wrap" style="margin-top:10px; display:none">
+                        <button type="button" id="fatura-confirmar">Fechar fatura</button>
+                    </div>
+                    <div id="fatura-msg" class="msg" style="margin-top:8px" aria-live="polite"></div>
+
+                    <h2 style="margin-top:24px">Faturas fechadas</h2>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cartão</th>
+                                    <th>Fechamento</th>
+                                    <th class="num">Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fatura-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h2>Compras</h2>
                     <form id="filtro-form" class="form-filtros" style="margin-bottom:16px">
                         <div class="busca">
@@ -104,6 +142,7 @@
                             <tbody id="rows"></tbody>
                         </table>
                     </div>
+                    <p class="table-scroll-dica">Dica: passe o mouse sobre a tabela e use ← → do teclado pra rolar pros lados.</p>
                     <div id="rows-info" class="msg" style="margin-top:10px" aria-live="polite"></div>
                 </div>
             </main>
