@@ -194,17 +194,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resumoEl = document.getElementById('resumo');
     resumoEl.innerHTML = `
-        <div class="stat" style="--tint: var(--accent)"><div class="label">Patrimônio total</div><div class="value" data-contagem="${Number(data.patrimonio_total)}"></div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Renda Fixa']}"><div class="label">Renda Fixa</div><div class="value" data-contagem="${Number(data.total_renda_fixa)}"></div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Bolsa']}"><div class="label">Bolsa</div><div class="value" data-contagem="${Number(data.total_bolsa)}"></div></div>
-        <div class="stat" style="--tint: ${CORES_FONTE['Caixinha Turbo']}"><div class="label">Caixinha Turbo</div><div class="value" data-contagem="${Number(data.total_caixinha_turbo)}"></div></div>
+        <div class="card-composable">
+            <div class="top-label">Patrimônio Total</div>
+            <div class="huge-value ok" data-contagem="${Number(data.patrimonio_total)}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill ok" style="width: 100%"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">Renda Fixa</div>
+            <div class="huge-value neutral" data-contagem="${Number(data.total_renda_fixa)}" style="color: ${CORES_FONTE['Renda Fixa']}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${data.pct_renda_fixa * 100}%; background-color: ${CORES_FONTE['Renda Fixa']}"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">Bolsa</div>
+            <div class="huge-value neutral" data-contagem="${Number(data.total_bolsa)}" style="color: ${CORES_FONTE['Bolsa']}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${data.pct_bolsa * 100}%; background-color: ${CORES_FONTE['Bolsa']}"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">Caixinha Turbo</div>
+            <div class="huge-value neutral" data-contagem="${Number(data.total_caixinha_turbo)}" style="color: ${CORES_FONTE['Caixinha Turbo']}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${data.pct_caixinha_turbo * 100}%; background-color: ${CORES_FONTE['Caixinha Turbo']}"></div></div>
+        </div>
     `;
     animarContagens(resumoEl);
 
     document.getElementById('rows').innerHTML = `
-        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Renda Fixa']}"></span>Renda Fixa</td><td class="num">${formatMoney(data.total_renda_fixa)}</td><td class="num">${(data.pct_renda_fixa * 100).toFixed(1)}%</td></tr>
-        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Bolsa']}"></span>Bolsa</td><td class="num">${formatMoney(data.total_bolsa)}</td><td class="num">${(data.pct_bolsa * 100).toFixed(1)}%</td></tr>
-        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Caixinha Turbo']}"></span>Caixinha Turbo</td><td class="num">${formatMoney(data.total_caixinha_turbo)}</td><td class="num">${(data.pct_caixinha_turbo * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Renda Fixa']}; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></span>Renda Fixa</td><td class="num">${formatMoney(data.total_renda_fixa)}</td><td class="num">${(data.pct_renda_fixa * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Bolsa']}; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></span>Bolsa</td><td class="num">${formatMoney(data.total_bolsa)}</td><td class="num">${(data.pct_bolsa * 100).toFixed(1)}%</td></tr>
+        <tr><td><span class="cor-swatch" style="background:${CORES_FONTE['Caixinha Turbo']}; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></span>Caixinha Turbo</td><td class="num">${formatMoney(data.total_caixinha_turbo)}</td><td class="num">${(data.pct_caixinha_turbo * 100).toFixed(1)}%</td></tr>
     `;
 
     renderDonut('donut-distribuicao', [

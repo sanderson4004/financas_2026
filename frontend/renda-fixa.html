@@ -6,6 +6,8 @@
     <script>(function(){var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
     <title>Finanças 2026 — Renda Fixa</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -17,6 +19,21 @@
             </header>
 
             <main>
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <h2 style="margin: 0;">Evolução Patrimonial</h2>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="secondary" id="btn-chart-diario">Diário</button>
+                            <button class="secondary" id="btn-chart-semanal">Semanal</button>
+                            <button class="secondary active" id="btn-chart-mensal">Mensal</button>
+                            <button class="secondary" id="btn-chart-anual">Anual</button>
+                        </div>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="rfChart"></canvas>
+                    </div>
+                </div>
+
                 <div class="card">
                     <h2>Nova aplicação</h2>
                     <form id="rf-form" class="stack">
@@ -37,7 +54,7 @@
                             </div>
                             <div>
                                 <label for="isento_ir">Isento de IR?</label>
-                                <select id="isento_ir">
+                                <select id="isento_ir" data-no-search="true">
                                     <option value="false">Não</option>
                                     <option value="true">Sim</option>
                                 </select>
@@ -69,9 +86,9 @@
                 </div>
 
                 <div class="card">
-                    <h2>Carteira de Renda Fixa</h2>
+                    <h2>Carteira de Renda Fixa (Ativa)</h2>
                     <div class="table-scroll">
-                        <table class="tabela-renda-fixa">
+                        <table class="tabela-renda-fixa table-list">
                             <thead>
                                 <tr>
                                     <th>Instituição</th>
@@ -82,9 +99,9 @@
                                     <th class="num secundaria">Dias venc.</th>
                                     <th class="num secundaria">IR estim.</th>
                                     <th class="num secundaria">Líquido estim.</th>
-                                    <th class="num secundaria">Líquido informado</th>
+                                    <th class="num secundaria">Líquido info.</th>
                                     <th class="num">% carteira</th>
-                                    <th>Atualizar</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="rows"></tbody>
@@ -92,9 +109,52 @@
                     </div>
                     <p class="table-scroll-dica">Dica: passe o mouse sobre a tabela e use ← → do teclado pra rolar pros lados.</p>
                 </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h2>Histórico de Resgates</h2>
+                    <div class="table-scroll">
+                        <table class="tabela-renda-fixa table-list">
+                            <thead>
+                                <tr>
+                                    <th>Data Resgate</th>
+                                    <th>Instituição</th>
+                                    <th>Tipo</th>
+                                    <th class="num">Aplicado</th>
+                                    <th class="num">Valor Resgatado</th>
+                                    <th class="num">Lucro Realizado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows-resgatados"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Modal de Resgate -->
+                <dialog id="modal-resgate" style="border:1px solid var(--border); border-radius:var(--radius-md); background:var(--bg); color:var(--text); padding:20px; max-width:400px; margin:auto;">
+                    <h3 style="margin-top:0">Resgatar Investimento</h3>
+                    <p id="resgate-nome" style="color:var(--text-light); margin-bottom:16px"></p>
+                    <form id="resgate-form" class="stack">
+                        <div>
+                            <label for="resgate-data">Data do Resgate</label>
+                            <input type="date" id="resgate-data" required>
+                        </div>
+                        <div>
+                            <label for="resgate-valor">Valor Resgatado Líquido (R$)</label>
+                            <input type="number" id="resgate-valor" step="0.01" required>
+                            <small style="color:var(--text-light)">Esse valor entrará como receita no seu Fluxo (Saldo Nubank).</small>
+                        </div>
+                        <div class="row" style="margin-top:16px">
+                            <button type="button" class="secondary" id="btn-cancelar-resgate">Cancelar</button>
+                            <button type="submit">Confirmar Resgate</button>
+                        </div>
+                    </form>
+                </dialog>
+
             </main>
         </div>
     </div>
+    <!-- Chart.js para o gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="js/supabaseClient.js"></script>

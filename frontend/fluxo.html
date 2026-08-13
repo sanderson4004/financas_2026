@@ -6,6 +6,8 @@
     <script>(function(){var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
     <title>Finanças 2026 — Fluxo</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -107,8 +109,9 @@
                             <button type="button" class="secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
+                    <div id="filtro-total" class="msg" style="margin-bottom:16px; display:none;"></div>
                     <div class="table-scroll">
-                        <table>
+                        <table class="table-list">
                             <thead>
                                 <tr>
                                     <th>Data</th>

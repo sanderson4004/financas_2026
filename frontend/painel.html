@@ -6,6 +6,8 @@
     <script>(function(){var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
     <title>Finanças 2026 — Painel de Metas</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -22,25 +24,24 @@
                     <div class="row" style="display:flex; gap:12px; align-items:flex-end; max-width:460px">
                         <div>
                             <label for="mes-sel">Mês</label>
-                            <select id="mes-sel"></select>
+                            <select id="mes-sel" data-no-search="true"></select>
                         </div>
                         <div>
                             <label for="ano-sel">Ano</label>
-                            <select id="ano-sel"></select>
+                            <select id="ano-sel" data-no-search="true"></select>
                         </div>
                         <button type="button" id="btn-mes-atual" class="secondary">Mês atual</button>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h2>Resumo do mês</h2>
-                    <div class="summary-grid" id="summary"></div>
+                    <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Resumo do Mês</h2>
+                    <div class="summary-grid" id="summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;"></div>
                 </div>
 
-                <div class="card">
-                    <h2>Detalhe por categoria</h2>
+                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
                     <div class="table-scroll">
-                        <table>
+                        <table class="table-list">
                             <thead>
                                 <tr>
                                     <th>Código</th>

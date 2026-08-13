@@ -6,6 +6,8 @@
     <script>(function(){var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
     <title>Finanças 2026 — Bolsa de Valores</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -60,10 +62,10 @@
                     </form>
                 </div>
 
-                <div class="card">
-                    <h2>Carteira de Bolsa</h2>
+                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                    <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Carteira de Bolsa</h2>
                     <div class="table-scroll">
-                        <table class="tabela-bolsa">
+                        <table class="tabela-bolsa table-list">
                             <thead>
                                 <tr>
                                     <th>Ticker</th>
@@ -74,7 +76,7 @@
                                     <th class="num secundaria">Valoriz. %</th>
                                     <th class="num secundaria">Rentab. total %</th>
                                     <th class="num">% carteira</th>
-                                    <th>Cotação / proventos</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="rows"></tbody>

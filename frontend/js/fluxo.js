@@ -108,6 +108,16 @@ async function carregarLancamentos() {
 
     info.textContent = `${data.length} lançamento(s) encontrado(s).`;
 
+    const divTotal = document.getElementById('filtro-total');
+    if (divTotal) {
+        if (data.length > 0) {
+            const soma = data.reduce((acc, row) => acc + Number(row.valor), 0);
+            divTotal.innerHTML = `<strong>Total filtrado:</strong> ${formatMoney(soma)}`;
+            divTotal.style.display = 'block';
+        } else {
+            divTotal.style.display = 'none';
+        }
+    }
     tbody.innerHTML = data.map(r => `
         <tr>
             <td>${formatDate(r.data_movimento || r.data_pagamento)}</td>

@@ -6,6 +6,8 @@
     <script>(function(){var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
     <title>Finanças 2026 — Crédito</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -78,13 +80,31 @@
                     </form>
                     <div id="fatura-preview" class="msg" style="margin-top:10px" aria-live="polite"></div>
                     <div id="fatura-confirmar-wrap" style="margin-top:10px; display:none">
-                        <button type="button" id="fatura-confirmar">Fechar fatura</button>
+                        <div style="margin-bottom: 10px;">
+                            <label for="fatura-valor-pago">Valor Pago (R$)</label>
+                            <input type="number" id="fatura-valor-pago" step="0.01" style="max-width: 150px;">
+                            <small style="display:block; color:var(--text-light); margin-top:4px;">Deixe igual ao total para pagar tudo. Se for menor, o sistema gera uma parcela com a diferença.</small>
+                            <div style="margin-top:24px; padding: 24px; background: var(--panel-2); border-radius: 12px; border: 1px solid var(--border);">
+                                <h3 class="top-label" style="margin-bottom: 16px;">O que fazer com o valor restante?</h3>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <label class="selectable-card">
+                                        <input type="radio" name="acao_restante" id="acao-manter" value="manter" checked>
+                                        <div style="font-weight: 500;">Manter em aberto no mês atual</div>
+                                    </label>
+                                    <label class="selectable-card">
+                                        <input type="radio" name="acao_restante" id="acao-postergar" value="postergar">
+                                        <div style="font-weight: 500;">Postergar para o próximo mês</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="fatura-confirmar" style="margin-top: 16px;">Fechar fatura</button>
                     </div>
                     <div id="fatura-msg" class="msg" style="margin-top:8px" aria-live="polite"></div>
 
                     <h2 style="margin-top:24px">Faturas fechadas</h2>
                     <div class="table-scroll">
-                        <table>
+                        <table class="table-list">
                             <thead>
                                 <tr>
                                     <th>Cartão</th>
@@ -134,8 +154,9 @@
                             <button type="button" class="secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
+                    <div id="filtro-total" class="msg" style="margin-bottom:16px; display:none;"></div>
                     <div class="table-scroll">
-                        <table>
+                        <table class="table-list">
                             <thead>
                                 <tr>
                                     <th>Descrição</th>

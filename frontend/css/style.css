@@ -495,34 +495,35 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
    Cards, formulários, tabelas
 --------------------------------------------------------------------- */
 .card {
-    background: linear-gradient(180deg, var(--panel) 0%, var(--bg-elevated) 100%);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius);
-    padding: 28px 30px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
     margin-bottom: 24px;
-    box-shadow: var(--shadow-soft), var(--sheen);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     animation: card-in 0.35s cubic-bezier(.2,.8,.2,1) both;
-    transition: box-shadow 0.2s ease;
 }
-.card:hover { box-shadow: var(--shadow), var(--sheen); }
 
 @keyframes card-in {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 .card h2 {
-    font-family: var(--font-body);
-    font-size: 11.5px;
-    margin: 0 0 18px;
-    color: var(--text-dim);
+    font-size: 0.875rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
 }
+
+form.stack { display: flex; flex-direction: column; gap: 16px; }
+form.stack > button { align-self: flex-start; }
 
 .card h2::before {
     content: '';
@@ -679,12 +680,10 @@ input[type="color"] {
     cursor: pointer;
 }
 
-form.stack { display: flex; flex-direction: column; gap: 15px; max-width: 520px; }
-/* ".row" pode ser um <div> dentro do form OU o próprio <form> ter a classe
-   — os dois casos precisam do mesmo layout (o seletor só com espaço
-   "form .row" não pega o segundo caso, form.row). */
-form.row, form .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
-form.row > *, form .row > * { flex: 1; min-width: 160px; }
+form.stack { display: flex; flex-direction: column; gap: 16px; }
+/* ".row" pode ser um <div> dentro do form OU o próprio <form> ter a classe */
+form.row, form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: end; }
+/* Removermos flex:1 e min-width fixo para evitar esticar os inputs nas grids */
 
 /* Barra de filtros (Fluxo, Crédito): muitos campos pequenos — um grid se
    organiza melhor que flex-wrap, que faz cada campo "sobrando" virar uma
@@ -716,17 +715,63 @@ label {
     font-weight: 600;
     line-height: 1.3;
 }
+/* ---------------------------------------------------------------------
+   TomSelect - Correções de Tema
+--------------------------------------------------------------------- */
+.ts-wrapper .ts-control {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 14px;
+    min-height: auto;
+    font-size: 0.875rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+}
+.ts-wrapper.focus .ts-control {
+    border-color: var(--ok);
+    box-shadow: 0 0 0 3px var(--ok-soft);
+}
+.ts-dropdown {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    margin-top: 4px;
+}
+.ts-dropdown .option, .ts-dropdown .optgroup-header {
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.875rem;
+}
+.ts-dropdown .active {
+    background: var(--panel-hover);
+    color: var(--text);
+}
+.ts-wrapper .ts-control input {
+    color: var(--text);
+    font-size: 0.875rem;
+}
+.ts-wrapper .ts-control input::placeholder {
+    color: var(--text-faint);
+}
+.ts-control .item {
+    color: var(--text) !important;
+}
 
 input, select, textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 14px;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: 8px;
     color: var(--text);
-    font-size: 13.5px;
+    font-size: 0.875rem;
     font-family: inherit;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus, select:focus, textarea:focus {

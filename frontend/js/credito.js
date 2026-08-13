@@ -252,9 +252,37 @@ async function carregarCompras() {
         .order('numero_parcela');
 
     const porCompra = {};
+    let somaTotal = 0;
     for (const p of (parcelas || [])) {
         if (!porCompra[p.compra_id]) porCompra[p.compra_id] = [];
         porCompra[p.compra_id].push(p);
+    }
+
+    let labelSoma = 'Total das compras exibidas (soma de todas as parcelas):';
+    if (f.vencDe || f.vencAte) {
+        labelSoma = 'Total filtrado (apenas parcelas no período de vencimento):';
+    }
+
+    compras.forEach(c => {
+        const ps = porCompra[c.id] || [];
+        ps.forEach(p => {
+            let dentro = true;
+            if (f.vencDe && p.data_vencimento < f.vencDe) dentro = false;
+            if (f.vencAte && p.data_vencimento > f.vencAte) dentro = false;
+            if (dentro) {
+                somaTotal += Number(p.valor_parcela);
+            }
+        });
+    });
+
+    const divTotal = document.getElementById('filtro-total');
+    if (divTotal) {
+        if (compras.length > 0) {
+            divTotal.innerHTML = `<strong>${labelSoma}</strong> ${formatMoney(somaTotal)}`;
+            divTotal.style.display = 'block';
+        } else {
+            divTotal.style.display = 'none';
+        }
     }
 
     tbody.innerHTML = compras.map(c => renderLinhaCompra(c, porCompra[c.id] || [])).join('');
@@ -330,7 +358,7 @@ async function consultarFaturaAberta() {
 
     const { data, error } = await sb
         .from('credito_resolvido')
-        .select('parcela_id, valor_parcela')
+        .select('parcela_id, valor_parcela, data_vencimento')
         .eq('cartao', cartao)
         .eq('pago', false)
         .lte('data_vencimento', dataFechamento);
@@ -348,11 +376,34 @@ async function consultarFaturaAberta() {
     }
 
     const total = data.reduce((s, p) => s + Number(p.valor_parcela), 0);
-    preview.innerHTML = `${data.length} parcela(s) em aberto, totalizando <strong style="color:var(--text)">${formatMoney(total)}</strong> — esse valor será debitado do Saldo Nubank.`;
-    preview.className = 'msg';
+    
+    const porMes = {};
+    for (const p of data) {
+        const d = new Date(p.data_vencimento + 'T12:00:00'); // Evitar problemas de timezone
+        const mesAno = d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+        porMes[mesAno] = (porMes[mesAno] || 0) + Number(p.valor_parcela);
+    }
+    
+    let breakdownHTML = '<ul style="margin: 8px 0 0 16px; padding: 0; font-size: 13px; color: var(--text-dim);">';
+    for (const [mes, valor] of Object.entries(porMes)) {
+        breakdownHTML += `<li>${mes}: ${formatMoney(valor)}</li>`;
+    }
+    breakdownHTML += '</ul>';
+
+    preview.innerHTML = `<strong>Total a pagar:</strong> ${formatMoney(total)}<br>
+                         <div style="margin-top: 6px; font-weight: 600;">Detalhamento por mês de vencimento:</div>
+                         ${breakdownHTML}`;
+    preview.className = 'msg info';
+    
     wrapConfirmar.style.display = 'block';
     wrapConfirmar.dataset.cartao = cartao;
     wrapConfirmar.dataset.data = dataFechamento;
+    wrapConfirmar.dataset.total = total;
+    
+    const inputValorPago = document.getElementById('fatura-valor-pago');
+    if (inputValorPago) {
+        inputValorPago.value = total.toFixed(2);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -387,8 +438,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const msg = document.getElementById('fatura-msg');
         const cartao = wrapConfirmar.dataset.cartao;
         const dataFechamento = wrapConfirmar.dataset.data;
+        const totalFatura = parseFloat(wrapConfirmar.dataset.total || '0');
+        
+        const inputValorPago = document.getElementById('fatura-valor-pago');
+        const valorPago = inputValorPago ? parseFloat(inputValorPago.value) : totalFatura;
 
-        const ok = await confirmarAcao(`Fechar a fatura de "${cartao}" com vencimento até ${formatDate(dataFechamento)}? Isso vai debitar o valor do Saldo Nubank em Fluxo.`, 'Sim, fechar fatura');
+        if (isNaN(valorPago) || valorPago < 0 || valorPago > totalFatura) {
+            msg.textContent = 'Valor pago inválido. O valor deve ser maior ou igual a 0 e não pode ultrapassar o total da fatura.';
+            msg.className = 'msg error';
+            return;
+        }
+
+        msg.textContent = 'Verificando saldo...';
+        msg.className = 'msg';
+        
+        const { data: saldoData } = await sb.from('lancamentos_fluxo').select('valor');
+        const saldoNubank = saldoData ? saldoData.reduce((sum, d) => sum + Number(d.valor), 0) : 0;
+
+        if (valorPago > saldoNubank) {
+            msg.textContent = `Impossível fechar a fatura: Seu Saldo Nubank (R$ ${saldoNubank.toFixed(2).replace('.', ',')}) é menor que o valor informado (R$ ${valorPago.toFixed(2).replace('.', ',')}).`;
+            msg.className = 'msg error';
+            return;
+        }
+
+        const ok = await confirmarAcao(`Fechar a fatura de "${cartao}" com vencimento até ${formatDate(dataFechamento)} pagando ${formatMoney(valorPago)}?`, 'Sim, fechar fatura');
         if (!ok) return;
 
         msg.textContent = 'Fechando fatura...';
@@ -406,7 +479,64 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            msg.textContent = `Fatura fechada: ${formatMoney(data.valor_total)} debitados do Saldo Nubank.`;
+            // Se o valor pago for menor que o total da fatura, gera a postergação e ajusta o fluxo
+            if (valorPago < totalFatura) {
+                const diff = totalFatura - valorPago;
+
+                // 1. Encontrar o lançamento recém-criado para ajustar os valores
+                const { data: ultimos } = await sb
+                    .from('fechamentos_fatura')
+                    .select('id, lancamento_fluxo_id')
+                    .eq('cartao', cartao)
+                    .order('criado_em', { ascending: false })
+                    .limit(1);
+
+                if (ultimos && ultimos.length > 0) {
+                    const f = ultimos[0];
+                    await sb.from('fechamentos_fatura').update({ valor_total: valorPago }).eq('id', f.id);
+                    if (f.lancamento_fluxo_id) {
+                        await sb.from('lancamentos_fluxo').update({ valor: -valorPago }).eq('id', f.lancamento_fluxo_id);
+                    }
+                }
+
+                // 3. Lançar a diferença (postergar ou manter no mês)
+                const isPostergar = document.getElementById('acao-postergar') && document.getElementById('acao-postergar').checked;
+                const dataNovaParcela = isPostergar ? somarMeses(dataFechamento, 1) : dataFechamento;
+                const descNovaParcela = isPostergar ? 'Postergação de fatura' : 'Restante da fatura';
+
+                let catFinal = null;
+                if (isPostergar) {
+                    // 2. Garantir que exista uma categoria para Postergação
+                    let { data: categorias } = await sb.from('categorias').select('codigo').ilike('nome', '%posterga%').limit(1);
+                    catFinal = (categorias && categorias.length > 0) ? categorias[0].codigo : null;
+                    if (!catFinal) {
+                        catFinal = '#POSTERGA';
+                        await sb.from('categorias').insert({ codigo: catFinal, nome: 'Postergação', carater: 'DESPESA', cor: '#737373' });
+                    }
+                }
+
+                const { data: novaCompra } = await sb.from('compras_credito').insert({
+                    descricao: descNovaParcela,
+                    cartao: cartao,
+                    categoria_codigo: catFinal,
+                    data_compra: dataFechamento,
+                    historico_sem_data: false,
+                    total_parcelas: 1,
+                    valor_parcela: diff
+                }).select().single();
+
+                if (novaCompra) {
+                    await sb.from('parcelas_credito').insert({
+                        compra_id: novaCompra.id,
+                        numero_parcela: 1,
+                        data_vencimento: dataNovaParcela,
+                        categoria_codigo: catFinal,
+                        valor_parcela: diff
+                    });
+                }
+            }
+
+            msg.textContent = `Fatura fechada: ${formatMoney(valorPago)} debitados do Saldo Nubank.`;
             msg.className = 'msg success';
             wrapConfirmar.style.display = 'none';
             document.getElementById('fatura-preview').textContent = '';

@@ -48,10 +48,26 @@ async function carregarPainel(mesFoco) {
 
     const summaryEl = document.getElementById('summary');
     summaryEl.innerHTML = `
-        <div class="stat" style="--tint: var(--ok)"><div class="label">Total receitas</div><div class="value" data-contagem="${totalReceitas}"></div></div>
-        <div class="stat" style="--tint: var(--bad)"><div class="label">Total despesas</div><div class="value" data-contagem="${totalDespesas}"></div></div>
-        <div class="stat" style="--tint: var(--pending)"><div class="label">Reserva guardada</div><div class="value" data-contagem="${totalReserva}"></div></div>
-        <div class="stat" style="--tint: ${tintPct}"><div class="label">% de metas batidas</div><div class="value">${pctBatidas === null ? '—' : (pctBatidas * 100).toFixed(0) + '%'}</div></div>
+        <div class="card-composable">
+            <div class="top-label">Total Receitas</div>
+            <div class="huge-value ok" data-contagem="${totalReceitas}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill ok" style="width: 100%"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">Total Despesas</div>
+            <div class="huge-value bad" data-contagem="${totalDespesas}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill bad" style="width: 100%"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">Reserva Guardada</div>
+            <div class="huge-value pending" data-contagem="${totalReserva}"></div>
+            <div class="progress-bar-container"><div class="progress-bar-fill pending" style="width: 100%"></div></div>
+        </div>
+        <div class="card-composable">
+            <div class="top-label">% de Metas Batidas</div>
+            <div class="huge-value ${tintPct === 'var(--ok)' ? 'ok' : tintPct === 'var(--bad)' ? 'bad' : 'pending'}">${pctBatidas === null ? '—' : (pctBatidas * 100).toFixed(0) + '%'}</div>
+            <div class="progress-bar-container"><div class="progress-bar-fill ${tintPct === 'var(--ok)' ? 'ok' : tintPct === 'var(--bad)' ? 'bad' : 'pending'}" style="width: ${pctBatidas === null ? 0 : pctBatidas * 100}%"></div></div>
+        </div>
     `;
     animarContagens(summaryEl);
 }

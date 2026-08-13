@@ -422,20 +422,19 @@ function statusClass(status) {
 
 function statusPill(status) {
     if (!status) return '';
-    return `<span class="pill ${statusClass(status)}">${status}</span>`;
+    let cls = 'neutral';
+    if (status.startsWith('✓')) cls = 'ok';
+    if (status.startsWith('✗')) cls = 'bad';
+    if (status.startsWith('⚠') || status.toLowerCase().includes('pendente')) cls = 'pending';
+    return `<span class="pill ${cls}">${status}</span>`;
 }
-
-const CARATER_CLASSES = {
-    'RECEITA': 'carater-receita',
-    'DESPESA': 'carater-despesa',
-    'RESERVA': 'carater-reserva',
-    'TRANSFERÊNCIA': 'carater-transferencia',
-    'EXCLUÍDO': 'carater-excluido',
-};
 
 function caraterPill(carater) {
     if (!carater) return '';
-    const cls = CARATER_CLASSES[carater] || 'carater-transferencia';
+    let cls = 'neutral';
+    if (carater === 'RECEITA') cls = 'ok';
+    if (carater === 'DESPESA') cls = 'bad';
+    if (carater === 'RESERVA') cls = 'pending';
     return `<span class="pill ${cls}">${carater}</span>`;
 }
 
@@ -550,4 +549,53 @@ function makeSortable(tbodyId) {
             linhas.forEach(tr => tbody.appendChild(tr));
         });
     });
+}
+
+// -----------------------------------------------------------------------
+// Inicializacao do TomSelect para todos os selects (com MutationObserver)
+// -----------------------------------------------------------------------
+function initSelects() {
+    if (typeof TomSelect !== 'undefined') {
+        document.querySelectorAll('select').forEach(el => {
+            if (el.getAttribute('data-no-search') === 'true') return;
+            
+            if (el.tomselect) {
+                el.tomselect.sync();
+            } else {
+                new TomSelect(el, {
+                    create: false,
+                    sortField: null,
+                    placeholder: 'Digite para buscar...'
+                });
+            }
+        });
+    }
+}
+
+function setupTomSelectObserver() {
+    initSelects();
+    const observer = new MutationObserver((mutations) => {
+        let shouldSync = false;
+        mutations.forEach(m => {
+            if (m.target.nodeName === 'SELECT' || m.target.nodeName === 'OPTION') {
+                shouldSync = true;
+            } else if (m.addedNodes.length > 0) {
+                m.addedNodes.forEach(node => {
+                    if (node.nodeName === 'SELECT' || (node.querySelector && node.querySelector('select'))) {
+                        shouldSync = true;
+                    }
+                });
+            }
+        });
+        if (shouldSync) {
+            setTimeout(initSelects, 10);
+        }
+    });
+    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTomSelectObserver);
+} else {
+    setupTomSelectObserver();
 }
