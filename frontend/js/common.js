@@ -425,7 +425,7 @@ function statusPill(status) {
     let cls = 'neutral';
     if (status.startsWith('✓')) cls = 'ok';
     if (status.startsWith('✗')) cls = 'bad';
-    if (status.startsWith('⚠') || status.toLowerCase().includes('pendente')) cls = 'pending';
+    if (status.startsWith('⚠') || status.startsWith('…') || status.toLowerCase().includes('pendente') || status.toLowerCase().includes('aguardando')) cls = 'pending';
     return `<span class="pill ${cls}">${status}</span>`;
 }
 
