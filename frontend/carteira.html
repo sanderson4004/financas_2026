@@ -19,33 +19,33 @@
             </header>
 
             <main>
-                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
-                    <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Patrimônio Total</h2>
-                    <div class="summary-grid" id="resumo" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;"></div>
+                <div class="card card--transparent">
+                    <h2 class="top-label">Patrimônio Total</h2>
+                    <div class="summary-grid" id="resumo"></div>
                 </div>
 
                 <div class="card" style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center; justify-content: center;">
                     <div style="flex: 1; min-width: 300px;">
-                        <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Distribuição da Carteira</h2>
+                        <h2 class="top-label">Distribuição da Carteira</h2>
                         <div id="donut-distribuicao" style="height: 300px;"></div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                        <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin: 0;">Evolução do Patrimônio</h2>
-                        <div class="row" style="gap: 8px;">
+                        <h2 class="top-label" style="margin:0;">Evolução do Patrimônio</h2>
+                        <div class="row" style="gap:8px;">
                             <button type="button" class="secondary periodo-btn" data-periodo="semanal">Semanal</button>
                             <button type="button" class="secondary periodo-btn" data-periodo="mensal">Mensal</button>
                             <button type="button" class="secondary periodo-btn" data-periodo="anual">Anual</button>
                         </div>
                     </div>
-                    <p class="msg hint" style="margin-bottom: 24px;">O histórico é gravado automaticamente (1 retrato por dia) toda vez que você abre esta tela.</p>
+                    <p class="msg hint">O histórico é gravado automaticamente (1 retrato por dia) toda vez que você abre esta tela.</p>
                     <div id="grafico-evolucao" style="height: 340px;"></div>
                 </div>
 
-                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
-                    <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Detalhe por Classe</h2>
+                <div class="card card--transparent">
+                    <h2 class="top-label">Detalhe por Classe</h2>
                     <div class="table-scroll">
                         <table class="table-list">
                             <thead>

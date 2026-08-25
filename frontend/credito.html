@@ -65,7 +65,7 @@
                 <div class="card">
                     <h2>Fechar fatura do cartão</h2>
                     <p class="msg hint">Fecha as parcelas em aberto de um cartão até a data escolhida e lança o abatimento no Saldo Nubank (Fluxo) automaticamente — só então elas somem de "em aberto" aqui.</p>
-                    <form id="fatura-form" class="row" style="align-items:flex-end; flex-wrap:wrap">
+                    <form id="fatura-form" class="row">
                         <div>
                             <label for="fatura-cartao">Cartão</label>
                             <select id="fatura-cartao" required></select>
@@ -78,15 +78,15 @@
                             <button type="button" class="secondary" id="fatura-consultar">Consultar</button>
                         </div>
                     </form>
-                    <div id="fatura-preview" class="msg" style="margin-top:10px" aria-live="polite"></div>
-                    <div id="fatura-confirmar-wrap" style="margin-top:10px; display:none">
-                        <div style="margin-bottom: 10px;">
+                    <div id="fatura-preview" class="msg" aria-live="polite"></div>
+                    <div id="fatura-confirmar-wrap" style="display:none">
+                        <div>
                             <label for="fatura-valor-pago">Valor Pago (R$)</label>
-                            <input type="number" id="fatura-valor-pago" step="0.01" style="max-width: 150px;">
-                            <small style="display:block; color:var(--text-light); margin-top:4px;">Deixe igual ao total para pagar tudo. Se for menor, o sistema gera uma parcela com a diferença.</small>
-                            <div style="margin-top:24px; padding: 24px; background: var(--panel-2); border-radius: 12px; border: 1px solid var(--border);">
-                                <h3 class="top-label" style="margin-bottom: 16px;">O que fazer com o valor restante?</h3>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <input type="number" id="fatura-valor-pago" step="0.01" style="max-width:160px;">
+                            <small style="display:block; color:var(--text-dim); margin-top:4px;">Deixe igual ao total para pagar tudo. Se for menor, o sistema gera uma parcela com a diferença.</small>
+                            <div class="card-composable" style="margin-top:24px;">
+                                <h3 class="top-label">O que fazer com o valor restante?</h3>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                                     <label class="selectable-card">
                                         <input type="radio" name="acao_restante" id="acao-manter" value="manter" checked>
                                         <div style="font-weight: 500;">Manter em aberto no mês atual</div>
@@ -98,11 +98,11 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" id="fatura-confirmar" style="margin-top: 16px;">Fechar fatura</button>
+                        <button type="button" id="fatura-confirmar">Fechar fatura</button>
                     </div>
-                    <div id="fatura-msg" class="msg" style="margin-top:8px" aria-live="polite"></div>
+                    <div id="fatura-msg" class="msg" aria-live="polite"></div>
 
-                    <h2 style="margin-top:24px">Faturas fechadas</h2>
+                    <h2>Faturas fechadas</h2>
                     <div class="table-scroll">
                         <table class="table-list">
                             <thead>
@@ -120,7 +120,7 @@
 
                 <div class="card">
                     <h2>Compras</h2>
-                    <form id="filtro-form" class="form-filtros" style="margin-bottom:16px">
+                    <form id="filtro-form" class="form-filtros">
                         <div class="busca">
                             <label for="f-busca">Buscar na descrição</label>
                             <input type="text" id="f-busca" placeholder="ex: notebook, presente...">
@@ -154,7 +154,7 @@
                             <button type="button" class="secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
-                    <div id="filtro-total" class="msg" style="margin-bottom:16px; display:none;"></div>
+                    <div id="filtro-total" class="msg" style="display:none;"></div>
                     <div class="table-scroll">
                         <table class="table-list">
                             <thead>
@@ -172,7 +172,7 @@
                         </table>
                     </div>
                     <p class="table-scroll-dica">Dica: passe o mouse sobre a tabela e use ← → do teclado pra rolar pros lados.</p>
-                    <div id="rows-info" class="msg" style="margin-top:10px" aria-live="polite"></div>
+                    <div id="rows-info" class="msg" aria-live="polite"></div>
                 </div>
             </main>
         </div>

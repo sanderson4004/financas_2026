@@ -21,7 +21,7 @@
             <main>
                 <div class="card">
                     <h2>Mês em foco</h2>
-                    <div class="row" style="display:flex; gap:12px; align-items:flex-end; max-width:460px">
+                    <div class="filter-row">
                         <div>
                             <label for="mes-sel">Mês</label>
                             <select id="mes-sel" data-no-search="true"></select>
@@ -35,11 +35,11 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="top-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px;">Resumo do Mês</h2>
-                    <div class="summary-grid" id="summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;"></div>
+                    <h2 class="top-label">Resumo do Mês</h2>
+                    <div class="summary-grid" id="summary"></div>
                 </div>
 
-                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                <div class="card card--transparent">
                     <div class="table-scroll">
                         <table class="table-list">
                             <thead>
