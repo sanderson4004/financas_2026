@@ -23,10 +23,10 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
                         <h2 style="margin:0;">Evolução Patrimonial</h2>
                         <div style="display: flex; gap: 8px;">
-                            <button class="secondary" id="btn-chart-diario">Diário</button>
-                            <button class="secondary" id="btn-chart-semanal">Semanal</button>
+                            <button class="btn-pulsar secondary" id="btn-chart-diario">Diário</button>
+                            <button class="btn-pulsar secondary" id="btn-chart-semanal">Semanal</button>
                             <button class="secondary active" id="btn-chart-mensal">Mensal</button>
-                            <button class="secondary" id="btn-chart-anual">Anual</button>
+                            <button class="btn-pulsar secondary" id="btn-chart-anual">Anual</button>
                         </div>
                     </div>
                     <div style="position: relative; height: 300px; width: 100%;">
@@ -40,21 +40,21 @@
                         <div class="row">
                             <div>
                                 <label for="instituicao">Instituição</label>
-                                <input type="text" id="instituicao" required>
+                                <input class="input-pulsar" type="text" id="instituicao" required>
                             </div>
                             <div>
                                 <label for="tipo_ativo">Tipo de ativo</label>
-                                <input type="text" id="tipo_ativo" required placeholder="ex: CDB, LCI, Tesouro">
+                                <input class="input-pulsar" type="text" id="tipo_ativo" required placeholder="ex: CDB, LCI, Tesouro">
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="indexador">Indexador / rentabilidade</label>
-                                <input type="text" id="indexador" placeholder="ex: 108% do CDI">
+                                <input class="input-pulsar" type="text" id="indexador" placeholder="ex: 108% do CDI">
                             </div>
                             <div>
                                 <label for="isento_ir">Isento de IR?</label>
-                                <select id="isento_ir" data-no-search="true">
+                                <select class="input-pulsar" id="isento_ir" data-no-search="true">
                                     <option value="false">Não</option>
                                     <option value="true">Sim</option>
                                 </select>
@@ -63,21 +63,21 @@
                         <div class="row">
                             <div>
                                 <label for="data_aplicacao">Data da aplicação</label>
-                                <input type="date" id="data_aplicacao" required>
+                                <input class="input-pulsar" type="date" id="data_aplicacao" required>
                             </div>
                             <div>
                                 <label for="data_vencimento">Data de vencimento</label>
-                                <input type="date" id="data_vencimento" required>
+                                <input class="input-pulsar" type="date" id="data_vencimento" required>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="valor_aplicado">Valor aplicado (R$)</label>
-                                <input type="number" id="valor_aplicado" step="0.01" required>
+                                <input class="input-pulsar" type="number" id="valor_aplicado" step="0.01" required>
                             </div>
                             <div>
                                 <label for="valor_bruto_atual">Valor bruto atual (R$)</label>
-                                <input type="number" id="valor_bruto_atual" step="0.01" required>
+                                <input class="input-pulsar" type="number" id="valor_bruto_atual" step="0.01" required>
                             </div>
                         </div>
                         <button type="submit">Salvar</button>
@@ -136,15 +136,15 @@
                     <form id="resgate-form" class="stack">
                         <div>
                             <label for="resgate-data">Data do Resgate</label>
-                            <input type="date" id="resgate-data" required>
+                            <input class="input-pulsar" type="date" id="resgate-data" required>
                         </div>
                         <div>
                             <label for="resgate-valor">Valor Resgatado Líquido (R$)</label>
-                            <input type="number" id="resgate-valor" step="0.01" required>
+                            <input class="input-pulsar" type="number" id="resgate-valor" step="0.01" required>
                             <small style="color:var(--text-dim)">Esse valor entrará como receita no seu Fluxo (Saldo Nubank).</small>
                         </div>
                         <div class="row">
-                            <button type="button" class="secondary" id="btn-cancelar-resgate">Cancelar</button>
+                            <button type="button" class="btn-pulsar secondary" id="btn-cancelar-resgate">Cancelar</button>
                             <button type="submit">Confirmar Resgate</button>
                         </div>
                     </form>

@@ -21,7 +21,7 @@
             <main>
                 <div class="card">
                     <h2>Saldo em caixa</h2>
-                    <div class="summary-grid" id="saldo-metodos"></div>
+                    <div class="kpi-grid" id="saldo-metodos"></div>
                 </div>
 
                 <div class="card">
@@ -31,7 +31,7 @@
                         <div class="row">
                             <div>
                                 <label for="carater">Caráter</label>
-                                <select id="carater" required>
+                                <select class="input-pulsar" id="carater" required>
                                     <option value="RECEITA">Receita</option>
                                     <option value="DESPESA" selected>Despesa</option>
                                     <option value="TRANSFERÊNCIA">Transferência</option>
@@ -39,33 +39,33 @@
                             </div>
                             <div>
                                 <label for="valor">Valor (R$)</label>
-                                <input type="number" id="valor" step="0.01" min="0.01" required placeholder="ex: 150.00">
+                                <input class="input-pulsar" type="number" id="valor" step="0.01" min="0.01" required placeholder="ex: 150.00">
                                 <div class="msg" id="valor-dica"></div>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="data_movimento">Data do movimento</label>
-                                <input type="date" id="data_movimento" required>
+                                <input class="input-pulsar" type="date" id="data_movimento" required>
                             </div>
                             <div>
                                 <label for="data_pagamento">Data de pagamento (se diferente)</label>
-                                <input type="date" id="data_pagamento">
+                                <input class="input-pulsar" type="date" id="data_pagamento">
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="metodo">Método</label>
-                                <select id="metodo" required></select>
+                                <select class="input-pulsar" id="metodo" required></select>
                             </div>
                             <div>
                                 <label for="categoria">Categoria</label>
-                                <select id="categoria" required></select>
+                                <select class="input-pulsar" id="categoria" required></select>
                             </div>
                         </div>
                         <div>
                             <label for="descricao">Descrição</label>
-                            <input type="text" id="descricao">
+                            <input class="input-pulsar" type="text" id="descricao">
                         </div>
                         <button type="submit">Lançar</button>
                         <div id="msg" class="msg" aria-live="polite"></div>
@@ -77,11 +77,11 @@
                     <form id="filtro-form" class="form-filtros">
                         <div class="busca">
                             <label for="f-busca">Buscar na descrição</label>
-                            <input type="text" id="f-busca" placeholder="ex: mercado, uber...">
+                            <input class="input-pulsar" type="text" id="f-busca" placeholder="ex: mercado, uber...">
                         </div>
                         <div>
                             <label for="f-carater">Caráter</label>
-                            <select id="f-carater">
+                            <select class="input-pulsar" id="f-carater">
                                 <option value="">Todos</option>
                                 <option value="RECEITA">Receita</option>
                                 <option value="DESPESA">Despesa</option>
@@ -90,23 +90,23 @@
                         </div>
                         <div>
                             <label for="f-categoria">Categoria</label>
-                            <select id="f-categoria"><option value="">Todas</option></select>
+                            <select class="input-pulsar" id="f-categoria"><option value="">Todas</option></select>
                         </div>
                         <div>
                             <label for="f-metodo">Método</label>
-                            <select id="f-metodo"><option value="">Todos</option></select>
+                            <select class="input-pulsar" id="f-metodo"><option value="">Todos</option></select>
                         </div>
                         <div>
                             <label for="f-data-de">De</label>
-                            <input type="date" id="f-data-de">
+                            <input class="input-pulsar" type="date" id="f-data-de">
                         </div>
                         <div>
                             <label for="f-data-ate">Até</label>
-                            <input type="date" id="f-data-ate">
+                            <input class="input-pulsar" type="date" id="f-data-ate">
                         </div>
                         <div class="acoes">
                             <button type="submit">Filtrar</button>
-                            <button type="button" class="secondary" id="f-limpar">Limpar</button>
+                            <button type="button" class="btn-pulsar secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
                     <div id="filtro-total" class="msg" style="display:none;"></div>

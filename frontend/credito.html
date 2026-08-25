@@ -25,36 +25,36 @@
                     <form id="credito-form" class="stack">
                         <div>
                             <label for="descricao">Descrição</label>
-                            <input type="text" id="descricao" required>
+                            <input class="input-pulsar" type="text" id="descricao" required>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="cartao">Cartão</label>
-                                <select id="cartao" required></select>
+                                <select class="input-pulsar" id="cartao" required></select>
                             </div>
                             <div>
                                 <label for="categoria">Categoria</label>
-                                <select id="categoria" required></select>
+                                <select class="input-pulsar" id="categoria" required></select>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="data_compra">Data da compra</label>
-                                <input type="date" id="data_compra" required>
+                                <input class="input-pulsar" type="date" id="data_compra" required>
                             </div>
                             <div>
                                 <label for="data_primeiro_vencimento">Vencimento da 1ª parcela</label>
-                                <input type="date" id="data_primeiro_vencimento" required>
+                                <input class="input-pulsar" type="date" id="data_primeiro_vencimento" required>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="total_parcelas">Quantidade de parcelas</label>
-                                <input type="number" id="total_parcelas" min="1" value="1" required>
+                                <input class="input-pulsar" type="number" id="total_parcelas" min="1" value="1" required>
                             </div>
                             <div>
                                 <label for="valor_parcela">Valor de cada parcela (R$)</label>
-                                <input type="number" id="valor_parcela" step="0.01" required>
+                                <input class="input-pulsar" type="number" id="valor_parcela" step="0.01" required>
                             </div>
                         </div>
                         <button type="submit">Lançar compra</button>
@@ -68,21 +68,21 @@
                     <form id="fatura-form" class="row">
                         <div>
                             <label for="fatura-cartao">Cartão</label>
-                            <select id="fatura-cartao" required></select>
+                            <select class="input-pulsar" id="fatura-cartao" required></select>
                         </div>
                         <div>
                             <label for="fatura-data">Data de fechamento</label>
-                            <input type="date" id="fatura-data" required>
+                            <input class="input-pulsar" type="date" id="fatura-data" required>
                         </div>
                         <div>
-                            <button type="button" class="secondary" id="fatura-consultar">Consultar</button>
+                            <button type="button" class="btn-pulsar secondary" id="fatura-consultar">Consultar</button>
                         </div>
                     </form>
                     <div id="fatura-preview" class="msg" aria-live="polite"></div>
                     <div id="fatura-confirmar-wrap" style="display:none">
                         <div>
                             <label for="fatura-valor-pago">Valor Pago (R$)</label>
-                            <input type="number" id="fatura-valor-pago" step="0.01" style="max-width:160px;">
+                            <input class="input-pulsar" type="number" id="fatura-valor-pago" step="0.01" style="max-width:160px;">
                             <small style="display:block; color:var(--text-dim); margin-top:4px;">Deixe igual ao total para pagar tudo. Se for menor, o sistema gera uma parcela com a diferença.</small>
                             <div class="card-composable" style="margin-top:24px;">
                                 <h3 class="top-label">O que fazer com o valor restante?</h3>
@@ -123,35 +123,35 @@
                     <form id="filtro-form" class="form-filtros">
                         <div class="busca">
                             <label for="f-busca">Buscar na descrição</label>
-                            <input type="text" id="f-busca" placeholder="ex: notebook, presente...">
+                            <input class="input-pulsar" type="text" id="f-busca" placeholder="ex: notebook, presente...">
                         </div>
                         <div>
                             <label for="f-cartao">Cartão</label>
-                            <select id="f-cartao"><option value="">Todos</option></select>
+                            <select class="input-pulsar" id="f-cartao"><option value="">Todos</option></select>
                         </div>
                         <div>
                             <label for="f-categoria">Categoria</label>
-                            <select id="f-categoria"><option value="">Todas</option></select>
+                            <select class="input-pulsar" id="f-categoria"><option value="">Todas</option></select>
                         </div>
                         <div>
                             <label for="f-data-de">Compra de</label>
-                            <input type="date" id="f-data-de">
+                            <input class="input-pulsar" type="date" id="f-data-de">
                         </div>
                         <div>
                             <label for="f-data-ate">até</label>
-                            <input type="date" id="f-data-ate">
+                            <input class="input-pulsar" type="date" id="f-data-ate">
                         </div>
                         <div>
                             <label for="f-venc-de">Vencimento de</label>
-                            <input type="date" id="f-venc-de">
+                            <input class="input-pulsar" type="date" id="f-venc-de">
                         </div>
                         <div>
                             <label for="f-venc-ate">até</label>
-                            <input type="date" id="f-venc-ate">
+                            <input class="input-pulsar" type="date" id="f-venc-ate">
                         </div>
                         <div class="acoes">
                             <button type="submit">Filtrar</button>
-                            <button type="button" class="secondary" id="f-limpar">Limpar</button>
+                            <button type="button" class="btn-pulsar secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
                     <div id="filtro-total" class="msg" style="display:none;"></div>
