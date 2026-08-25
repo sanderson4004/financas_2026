@@ -443,6 +443,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const inputValorPago = document.getElementById('fatura-valor-pago');
         const valorPago = inputValorPago ? parseFloat(inputValorPago.value) : totalFatura;
 
+        // Captura a escolha ANTES de qualquer await — se ler depois, o estado do radio pode ter mudado.
+        const acaoRestante = document.querySelector('input[name="acao_restante"]:checked');
+        const isPostergar = acaoRestante ? acaoRestante.value === 'postergar' : false;
+
         if (isNaN(valorPago) || valorPago < 0 || valorPago > totalFatura) {
             msg.textContent = 'Valor pago inválido. O valor deve ser maior ou igual a 0 e não pode ultrapassar o total da fatura.';
             msg.className = 'msg error';
@@ -500,7 +504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 // 3. Lançar a diferença (postergar ou manter no mês)
-                const isPostergar = document.getElementById('acao-postergar') && document.getElementById('acao-postergar').checked;
+                // isPostergar já foi capturado no início do handler, antes dos awaits.
                 const dataNovaParcela = isPostergar ? somarMeses(dataFechamento, 1) : dataFechamento;
                 const descNovaParcela = isPostergar ? 'Postergação de fatura' : 'Restante da fatura';
 

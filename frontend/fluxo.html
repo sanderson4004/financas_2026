@@ -40,7 +40,7 @@
                             <div>
                                 <label for="valor">Valor (R$)</label>
                                 <input type="number" id="valor" step="0.01" min="0.01" required placeholder="ex: 150.00">
-                                <div class="msg" id="valor-dica" style="margin-top:6px"></div>
+                                <div class="msg" id="valor-dica"></div>
                             </div>
                         </div>
                         <div class="row">
@@ -74,7 +74,7 @@
 
                 <div class="card">
                     <h2>Lançamentos</h2>
-                    <form id="filtro-form" class="form-filtros" style="margin-bottom:16px">
+                    <form id="filtro-form" class="form-filtros">
                         <div class="busca">
                             <label for="f-busca">Buscar na descrição</label>
                             <input type="text" id="f-busca" placeholder="ex: mercado, uber...">
@@ -109,7 +109,7 @@
                             <button type="button" class="secondary" id="f-limpar">Limpar</button>
                         </div>
                     </form>
-                    <div id="filtro-total" class="msg" style="margin-bottom:16px; display:none;"></div>
+                    <div id="filtro-total" class="msg" style="display:none;"></div>
                     <div class="table-scroll">
                         <table class="table-list">
                             <thead>
@@ -127,7 +127,7 @@
                         </table>
                     </div>
                     <p class="table-scroll-dica">Dica: passe o mouse sobre a tabela e use ← → do teclado pra rolar pros lados.</p>
-                    <div id="rows-info" class="msg" style="margin-top:10px" aria-live="polite"></div>
+                    <div id="rows-info" class="msg" aria-live="polite"></div>
                 </div>
             </main>
         </div>
