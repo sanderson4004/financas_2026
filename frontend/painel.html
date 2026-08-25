@@ -21,22 +21,22 @@
             <main>
                 <div class="card">
                     <h2>Mês em foco</h2>
-                    <div class="filter-row">
-                        <div>
+                    <div class="filter-bar">
+                        <div class="input-group">
                             <label for="mes-sel">Mês</label>
-                            <select id="mes-sel" data-no-search="true"></select>
+                            <select id="mes-sel" data-no-search="true" class="input-pulsar"></select>
                         </div>
-                        <div>
+                        <div class="input-group">
                             <label for="ano-sel">Ano</label>
-                            <select id="ano-sel" data-no-search="true"></select>
+                            <select id="ano-sel" data-no-search="true" class="input-pulsar"></select>
                         </div>
-                        <button type="button" id="btn-mes-atual" class="secondary">Mês atual</button>
+                        <button type="button" id="btn-mes-atual" class="btn-pulsar secondary">Mês atual</button>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card card--transparent">
                     <h2 class="top-label">Resumo do Mês</h2>
-                    <div class="summary-grid" id="summary"></div>
+                    <div class="kpi-grid" id="summary"></div>
                 </div>
 
                 <div class="card card--transparent">

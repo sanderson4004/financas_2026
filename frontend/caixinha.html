@@ -21,7 +21,7 @@
             <main>
                 <div class="card">
                     <h2>Resumo</h2>
-                    <div class="summary-grid" id="resumo"></div>
+                    <div class="kpi-grid" id="resumo"></div>
                 </div>
 
                 <div class="card">
@@ -30,15 +30,15 @@
                         <div class="row">
                             <div>
                                 <label for="saldo_inicial">Saldo inicial</label>
-                                <input type="number" id="saldo_inicial" step="0.01" required>
+                                <input class="input-pulsar" type="number" id="saldo_inicial" step="0.01" required>
                             </div>
                             <div>
                                 <label for="total_bruto_app" title="Total bruto informado pelo app">Total bruto (app)</label>
-                                <input type="number" id="total_bruto_app" step="0.01">
+                                <input class="input-pulsar" type="number" id="total_bruto_app" step="0.01">
                             </div>
                             <div>
                                 <label for="total_liquido_app" title="Total líquido informado pelo app">Total líquido (app)</label>
-                                <input type="number" id="total_liquido_app" step="0.01">
+                                <input class="input-pulsar" type="number" id="total_liquido_app" step="0.01">
                             </div>
                         </div>
                         <button type="submit">Salvar configuração</button>
@@ -52,24 +52,24 @@
                         <div class="row">
                             <div>
                                 <label for="tipo_movimento">Tipo</label>
-                                <select id="tipo_movimento" required>
+                                <select class="input-pulsar" id="tipo_movimento" required>
                                     <option value="Aplicação">Aplicação</option>
                                     <option value="Resgate">Resgate</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="valor">Valor (R$)</label>
-                                <input type="number" id="valor" step="0.01" min="0.01" required>
+                                <input class="input-pulsar" type="number" id="valor" step="0.01" min="0.01" required>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="data">Data</label>
-                                <input type="date" id="data" required>
+                                <input class="input-pulsar" type="date" id="data" required>
                             </div>
                             <div>
                                 <label for="origem_motivo">Origem / motivo</label>
-                                <input type="text" id="origem_motivo" required placeholder="ex: Aporte Meu, Resgate p/ Fluxo">
+                                <input class="input-pulsar" type="text" id="origem_motivo" required placeholder="ex: Aporte Meu, Resgate p/ Fluxo">
                             </div>
                         </div>
                         <button type="submit">Lançar</button>

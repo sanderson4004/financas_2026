@@ -24,15 +24,15 @@
                     <form id="parametros-form" class="row">
                         <div>
                             <label for="saldo-inicial">Saldo inicial (R$)</label>
-                            <input type="number" id="saldo-inicial" step="0.01" value="0" required>
+                            <input class="input-pulsar" type="number" id="saldo-inicial" step="0.01" value="0" required>
                         </div>
                         <div>
                             <label for="sim-inicio">Início da simulação</label>
-                            <input type="month" id="sim-inicio" required>
+                            <input class="input-pulsar" type="month" id="sim-inicio" required>
                         </div>
                         <div>
                             <label for="sim-fim">Fim da simulação</label>
-                            <input type="month" id="sim-fim" required>
+                            <input class="input-pulsar" type="month" id="sim-fim" required>
                         </div>
                         <div>
                             <button type="submit">Recalcular</button>
@@ -47,11 +47,11 @@
                         <div class="row">
                             <div>
                                 <label for="it-nome">Nome</label>
-                                <input type="text" id="it-nome" required placeholder="ex: Pensão, Faculdade, Venda do imóvel">
+                                <input class="input-pulsar" type="text" id="it-nome" required placeholder="ex: Pensão, Faculdade, Venda do imóvel">
                             </div>
                             <div>
                                 <label for="it-carater">Caráter</label>
-                                <select id="it-carater" required>
+                                <select class="input-pulsar" id="it-carater" required>
                                     <option value="RECEITA">Receita</option>
                                     <option value="DESPESA" selected>Despesa</option>
                                 </select>
@@ -60,40 +60,40 @@
                         <div class="row">
                             <div>
                                 <label for="it-recorrencia">Recorrência</label>
-                                <select id="it-recorrencia" required>
+                                <select class="input-pulsar" id="it-recorrencia" required>
                                     <option value="MENSAL">Mensal (recorrente)</option>
                                     <option value="UNICO">Evento único</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="it-valor">Valor (R$)</label>
-                                <input type="number" id="it-valor" step="0.01" min="0.01" required>
+                                <input class="input-pulsar" type="number" id="it-valor" step="0.01" min="0.01" required>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label id="label-data-inicio" for="it-data-inicio">Início (mês)</label>
-                                <input type="month" id="it-data-inicio" required>
+                                <input class="input-pulsar" type="month" id="it-data-inicio" required>
                             </div>
                             <div class="campo-condicional" id="wrap-data-fim">
                                 <label for="it-data-fim">Fim (mês, opcional)</label>
-                                <input type="month" id="it-data-fim">
+                                <input class="input-pulsar" type="month" id="it-data-fim">
                                 <div class="msg" id="duracao-preview" aria-live="polite"></div>
                             </div>
                         </div>
                         <div class="row campo-condicional oculto" id="wrap-rendimento">
                             <div>
                                 <label for="it-taxa">Rende? Taxa anual (ex: 1.09 = 9%/ano)</label>
-                                <input type="number" id="it-taxa" step="0.0001" placeholder="deixe em branco se não rende">
+                                <input class="input-pulsar" type="number" id="it-taxa" step="0.0001" placeholder="deixe em branco se não rende">
                             </div>
                             <div>
                                 <label for="it-meses-rendendo">Por quantos meses rende</label>
-                                <input type="number" id="it-meses-rendendo" min="1" placeholder="ex: 19">
+                                <input class="input-pulsar" type="number" id="it-meses-rendendo" min="1" placeholder="ex: 19">
                             </div>
                         </div>
                         <div>
                             <label for="it-observacao">Observação (opcional)</label>
-                            <input type="text" id="it-observacao">
+                            <input class="input-pulsar" type="text" id="it-observacao">
                         </div>
                         <button type="submit">Adicionar item</button>
                         <div id="item-msg" class="msg" aria-live="polite"></div>

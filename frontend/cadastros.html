@@ -25,17 +25,17 @@
                         <div class="row">
                             <div>
                                 <label for="cat-codigo">Código (automático)</label>
-                                <input type="text" id="cat-codigo" required readonly>
+                                <input class="input-pulsar" type="text" id="cat-codigo" required readonly>
                             </div>
                             <div>
                                 <label for="cat-nome">Nome</label>
-                                <input type="text" id="cat-nome" required>
+                                <input class="input-pulsar" type="text" id="cat-nome" required>
                             </div>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="cat-carater">Caráter</label>
-                                <select id="cat-carater" required>
+                                <select class="input-pulsar" id="cat-carater" required>
                                     <option value="RECEITA">Receita</option>
                                     <option value="DESPESA" selected>Despesa</option>
                                     <option value="RESERVA">Reserva</option>
@@ -43,7 +43,7 @@
                             </div>
                             <div>
                                 <label for="cat-cor">Cor</label>
-                                <input type="color" id="cat-cor" value="#4f8ff7">
+                                <input class="input-pulsar" type="color" id="cat-cor" value="#4f8ff7">
                                 <div class="msg" id="cat-cor-aviso" aria-live="polite"></div>
                             </div>
                         </div>
@@ -77,32 +77,32 @@
                     <form id="vigencia-form" class="stack">
                         <div>
                             <label for="vig-categoria">Categoria</label>
-                            <select id="vig-categoria" required></select>
+                            <select class="input-pulsar" id="vig-categoria" required></select>
                         </div>
                         <div class="row">
                             <div>
                                 <label for="vig-tipo">Tipo</label>
-                                <select id="vig-tipo" required>
+                                <select class="input-pulsar" id="vig-tipo" required>
                                     <option value="FIXA">Fixa — mensal, aparece no Painel de Metas</option>
                                     <option value="VARIAVEL">Variável — aparece em Custos Variáveis</option>
                                 </select>
                             </div>
                             <div id="vig-valor-wrap">
                                 <label for="vig-valor">Valor da meta (R$)</label>
-                                <input type="number" id="vig-valor" step="0.01" placeholder="deixe em branco só p/ categoria Reserva">
+                                <input class="input-pulsar" type="number" id="vig-valor" step="0.01" placeholder="deixe em branco só p/ categoria Reserva">
                             </div>
                         </div>
                         <div class="row campo-condicional oculto" id="vig-periodicidade-wrap">
                             <div>
                                 <label for="vig-periodicidade">Periodicidade</label>
-                                <select id="vig-periodicidade">
+                                <select class="input-pulsar" id="vig-periodicidade">
                                     <option value="ANUAL">Anual — reinicia todo ano</option>
                                     <option value="OUTRO_DELIMITADO">Prazo delimitado — até uma data</option>
                                 </select>
                             </div>
                             <div class="campo-condicional oculto" id="vig-janela-wrap">
                                 <label for="vig-janela">Como acumula</label>
-                                <select id="vig-janela">
+                                <select class="input-pulsar" id="vig-janela">
                                     <option value="MES_FOCO">Teto de gasto no mês em foco</option>
                                     <option value="DESDE_VIGENCIA">Meta de poupança (acumula desde o início)</option>
                                 </select>
@@ -111,16 +111,16 @@
                         <div class="row">
                             <div>
                                 <label for="vig-inicio">Vigência início</label>
-                                <input type="date" id="vig-inicio" required>
+                                <input class="input-pulsar" type="date" id="vig-inicio" required>
                             </div>
                             <div>
                                 <label for="vig-fim">Vigência fim (opcional)</label>
-                                <input type="date" id="vig-fim">
+                                <input class="input-pulsar" type="date" id="vig-fim">
                             </div>
                         </div>
                         <div>
                             <label for="vig-observacao">Observação (opcional)</label>
-                            <input type="text" id="vig-observacao">
+                            <input class="input-pulsar" type="text" id="vig-observacao">
                         </div>
                         <button type="submit">Cadastrar vigência</button>
                         <div id="vigencia-msg" class="msg" aria-live="polite"></div>
@@ -154,11 +154,11 @@
                     <form id="metodo-form" class="stack">
                         <div>
                             <label for="met-nome">Nome</label>
-                            <input type="text" id="met-nome" required placeholder="ex: CC - Bradesco">
+                            <input class="input-pulsar" type="text" id="met-nome" required placeholder="ex: CC - Bradesco">
                         </div>
                         <div>
                             <label for="met-cor">Cor</label>
-                            <input type="color" id="met-cor" value="#22c55e">
+                            <input class="input-pulsar" type="color" id="met-cor" value="#22c55e">
                             <div class="msg" id="met-cor-aviso" aria-live="polite"></div>
                         </div>
                         <button type="submit">Cadastrar método</button>
@@ -189,7 +189,7 @@
                     <form id="cartao-form" class="stack">
                         <div>
                             <label for="cart-nome">Nome</label>
-                            <input type="text" id="cart-nome" required placeholder="ex: CC - Bradesco">
+                            <input class="input-pulsar" type="text" id="cart-nome" required placeholder="ex: CC - Bradesco">
                         </div>
                         <button type="submit">Cadastrar cartão</button>
                         <div id="cart-msg" class="msg" aria-live="polite"></div>
